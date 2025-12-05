@@ -1,0 +1,116 @@
+import type { Context } from "hono";
+import { authMiddleware, optionalAuthMiddleware } from "../middleware/auth";
+import {
+	authenticateUser,
+	createUser,
+	getUserById,
+} from "../services/auth.service";
+import {
+	createRefreshToken,
+	refreshAccessToken,
+	revokeRefreshToken,
+} from "../services/token.service";
+import { generateAccessToken } from "../utils/jwt";
+import { createJsonValidator, getValidatedJson } from "../utils/validator";
+import {
+	loginSchema,
+	refreshTokenSchema,
+	registerSchema,
+} from "../validators/auth.validator";
+
+export const register = [
+	createJsonValidator(registerSchema),
+	async (c: Context) => {
+		const { name, email, password } = getValidatedJson(c, registerSchema);
+
+		const user = await createUser(name, email, password);
+
+		const accessToken = generateAccessToken(user.id);
+		const refreshToken = await createRefreshToken(user.id);
+
+		return c.json({
+			user: {
+				id: user.id,
+				name: user.name,
+				email: user.email,
+				createdAt: user.createdAt,
+			},
+			accessToken,
+			refreshToken,
+		});
+	},
+];
+
+export const login = [
+	createJsonValidator(loginSchema),
+	async (c: Context) => {
+		const { email, password } = getValidatedJson(c, loginSchema);
+
+		const user = await authenticateUser(email, password);
+
+		const accessToken = generateAccessToken(user.id);
+		const refreshToken = await createRefreshToken(user.id);
+
+		return c.json({
+			user: {
+				id: user.id,
+				name: user.name,
+				email: user.email,
+				createdAt: user.createdAt,
+			},
+			accessToken,
+			refreshToken,
+		});
+	},
+];
+
+export const refresh = [
+	createJsonValidator(refreshTokenSchema),
+	async (c: Context) => {
+		const { refreshToken } = getValidatedJson(c, refreshTokenSchema);
+
+		const tokens = await refreshAccessToken(refreshToken);
+
+		return c.json(tokens);
+	},
+];
+
+export const logout = [
+	authMiddleware,
+	createJsonValidator(refreshTokenSchema),
+	async (c: Context) => {
+		const { refreshToken } = getValidatedJson(c, refreshTokenSchema);
+		const userId = c.get("userId");
+
+		const user = await getUserById(userId);
+
+		await revokeRefreshToken(refreshToken);
+
+		return c.json({
+			message: "Wylogowano pomyślnie",
+			email: user.email,
+		});
+	},
+];
+
+export const me = [
+	optionalAuthMiddleware,
+	async (c: Context) => {
+		const userId = c.get("userId");
+
+		if (!userId) {
+			return c.json({ user: null });
+		}
+
+		const user = await getUserById(userId);
+
+		return c.json({
+			user: {
+				id: user.id,
+				name: user.name,
+				email: user.email,
+				createdAt: user.createdAt,
+			},
+		});
+	},
+];

@@ -1,0 +1,149 @@
+import { and, eq } from "drizzle-orm";
+import { db } from "../db/index";
+import { listItems, listShares, lists } from "../db/schema";
+import { ForbiddenError, NotFoundError } from "../utils/errors";
+
+async function checkListAccess(
+	listId: string,
+	userId: string,
+): Promise<"owner" | "editor" | null> {
+	const [list] = await db
+		.select()
+		.from(lists)
+		.where(eq(lists.id, listId))
+		.limit(1);
+
+	if (!list) {
+		return null;
+	}
+
+	if (list.authorId === userId) {
+		return "owner";
+	}
+
+	const [share] = await db
+		.select()
+		.from(listShares)
+		.where(and(eq(listShares.listId, listId), eq(listShares.userId, userId)))
+		.limit(1);
+
+	if (share) {
+		return share.role;
+	}
+
+	return null;
+}
+
+export async function createItem(
+	listId: string,
+	userId: string,
+	title: string,
+) {
+	const access = await checkListAccess(listId, userId);
+
+	if (!access) {
+		throw new NotFoundError("Nie znaleziono listy");
+	}
+
+	if (access !== "owner" && access !== "editor") {
+		throw new ForbiddenError(
+			"Nie masz uprawnień do dodawania elementów do tej listy",
+		);
+	}
+
+	const [item] = await db
+		.insert(listItems)
+		.values({
+			listId,
+			title,
+			isCompleted: false,
+		})
+		.returning();
+
+	return item;
+}
+
+export async function updateItem(
+	itemId: string,
+	listId: string,
+	userId: string,
+	data: { title?: string; is_completed?: boolean },
+) {
+	const access = await checkListAccess(listId, userId);
+
+	if (!access) {
+		throw new NotFoundError("Nie znaleziono listy");
+	}
+
+	if (access !== "owner" && access !== "editor") {
+		throw new ForbiddenError(
+			"Nie masz uprawnień do edycji elementów tej listy",
+		);
+	}
+
+	const [item] = await db
+		.select()
+		.from(listItems)
+		.where(eq(listItems.id, itemId))
+		.limit(1);
+
+	if (!item) {
+		throw new NotFoundError("Nie znaleziono elementu listy");
+	}
+
+	if (item.listId !== listId) {
+		throw new NotFoundError("Element nie należy do tej listy");
+	}
+
+	const updateData: { title?: string; isCompleted?: boolean } = {};
+
+	if (data.title !== undefined) {
+		updateData.title = data.title;
+	}
+
+	if (data.is_completed !== undefined) {
+		updateData.isCompleted = data.is_completed;
+	}
+
+	const [updatedItem] = await db
+		.update(listItems)
+		.set(updateData)
+		.where(eq(listItems.id, itemId))
+		.returning();
+
+	return updatedItem;
+}
+
+export async function deleteItem(
+	itemId: string,
+	listId: string,
+	userId: string,
+) {
+	const access = await checkListAccess(listId, userId);
+
+	if (!access) {
+		throw new NotFoundError("Nie znaleziono listy");
+	}
+
+	if (access !== "owner" && access !== "editor") {
+		throw new ForbiddenError(
+			"Nie masz uprawnień do usuwania elementów z tej listy",
+		);
+	}
+
+	const [item] = await db
+		.select()
+		.from(listItems)
+		.where(eq(listItems.id, itemId))
+		.limit(1);
+
+	if (!item) {
+		throw new NotFoundError("Nie znaleziono elementu listy");
+	}
+
+	if (item.listId !== listId) {
+		throw new NotFoundError("Element nie należy do tej listy");
+	}
+
+	await db.delete(listItems).where(eq(listItems.id, itemId));
+}
