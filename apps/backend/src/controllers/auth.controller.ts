@@ -1,3 +1,8 @@
+import {
+	loginSchema,
+	refreshTokenSchema,
+	registerSchema,
+} from "@ls/shared/validators";
 import type { Context } from "hono";
 import { authMiddleware, optionalAuthMiddleware } from "../middleware/auth";
 import {
@@ -12,11 +17,6 @@ import {
 } from "../services/token.service";
 import { generateAccessToken } from "../utils/jwt";
 import { createJsonValidator, getValidatedJson } from "../utils/validator";
-import {
-	loginSchema,
-	refreshTokenSchema,
-	registerSchema,
-} from "../validators/auth.validator";
 
 export const register = [
 	createJsonValidator(registerSchema),

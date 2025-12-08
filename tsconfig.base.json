@@ -3,8 +3,6 @@
 		"target": "ES2022",
 		"module": "ESNext",
 		"lib": ["ES2022"],
-		"outDir": "./dist",
-		"rootDir": "./src",
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"allowJs": true,
@@ -21,7 +19,5 @@
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"forceConsistentCasingInFileNames": true
-	},
-	"include": ["src/**/*"],
-	"exclude": ["node_modules", "dist"]
+	}
 }

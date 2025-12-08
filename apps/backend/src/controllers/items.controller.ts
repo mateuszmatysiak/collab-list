@@ -1,11 +1,8 @@
+import { createItemSchema, updateItemSchema } from "@ls/shared/validators";
 import type { Context } from "hono";
 import { authMiddleware } from "../middleware/auth";
 import { createItem, deleteItem, updateItem } from "../services/items.service";
 import { createJsonValidator, getValidatedJson } from "../utils/validator";
-import {
-	createItemSchema,
-	updateItemSchema,
-} from "../validators/items.validator";
 
 export const createItemController = [
 	authMiddleware,

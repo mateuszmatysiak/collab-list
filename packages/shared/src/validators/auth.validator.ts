@@ -14,3 +14,7 @@ export const loginSchema = z.object({
 export const refreshTokenSchema = z.object({
 	refreshToken: z.uuid(),
 });
+
+export type RegisterRequest = z.infer<typeof registerSchema>;
+export type LoginRequest = z.infer<typeof loginSchema>;
+export type RefreshTokenRequest = z.infer<typeof refreshTokenSchema>;

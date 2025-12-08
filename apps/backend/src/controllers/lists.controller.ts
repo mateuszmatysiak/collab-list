@@ -1,3 +1,4 @@
+import { createListSchema, updateListSchema } from "@ls/shared/validators";
 import type { Context } from "hono";
 import { authMiddleware } from "../middleware/auth";
 import {
@@ -8,10 +9,6 @@ import {
 	updateList,
 } from "../services/lists.service";
 import { createJsonValidator, getValidatedJson } from "../utils/validator";
-import {
-	createListSchema,
-	updateListSchema,
-} from "../validators/lists.validator";
 
 export const getLists = [
 	authMiddleware,

@@ -1,7 +1,7 @@
 {
-	"name": "ls-backend",
+	"name": "@ls/root",
 	"version": "1.0.0",
-	"main": "dist/index.js",
+	"private": true,
 	"type": "module",
 	"author": "Mateusz Matysiak",
 	"engines": {
@@ -9,35 +9,22 @@
 	},
 	"packageManager": "pnpm@9.15.0",
 	"scripts": {
-		"dev": "tsx watch --env-file=.env src/index.ts",
-		"build": "tsc",
-		"start": "node --env-file=.env dist/index.js",
-		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate",
-		"db:seed": "tsx --env-file=.env src/db/seed.ts",
-		"db:studio": "drizzle-kit studio",
+		"dev": "pnpm --parallel --filter @ls/backend --filter @ls/mobile dev",
+		"dev:backend": "pnpm --filter @ls/backend dev",
+		"dev:mobile": "pnpm --filter @ls/mobile start",
+		"build": "pnpm --recursive run build",
+		"build:backend": "pnpm --filter @ls/backend build",
+		"typecheck": "pnpm --recursive run typecheck",
 		"lint": "biome check --write .",
 		"format": "biome format --write .",
-		"check": "biome check --write ."
-	},
-	"dependencies": {
-		"@hono/node-server": "1.19.6",
-		"@hono/zod-validator": "0.7.5",
-		"bcrypt": "6.0.0",
-		"dotenv": "17.2.3",
-		"drizzle-orm": "0.44.7",
-		"hono": "4.10.7",
-		"jsonwebtoken": "9.0.3",
-		"postgres": "3.4.7",
-		"zod": "4.1.13"
+		"check": "biome check --write .",
+		"db:generate": "pnpm --filter @ls/backend db:generate",
+		"db:migrate": "pnpm --filter @ls/backend db:migrate",
+		"db:seed": "pnpm --filter @ls/backend db:seed",
+		"db:studio": "pnpm --filter @ls/backend db:studio"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.8",
-		"@types/bcrypt": "6.0.0",
-		"@types/jsonwebtoken": "9.0.10",
-		"@types/node": "22.16.0",
-		"drizzle-kit": "0.31.7",
-		"tsx": "4.21.0",
 		"typescript": "5.9.3"
 	}
 }

@@ -1,3 +1,4 @@
+import { shareListSchema } from "@ls/shared/validators";
 import type { Context } from "hono";
 import { authMiddleware } from "../middleware/auth";
 import {
@@ -6,7 +7,6 @@ import {
 	shareList,
 } from "../services/shares.service";
 import { createJsonValidator, getValidatedJson } from "../utils/validator";
-import { shareListSchema } from "../validators/shares.validator";
 
 export const shareListController = [
 	authMiddleware,

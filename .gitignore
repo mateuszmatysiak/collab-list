@@ -1,6 +1,17 @@
 node_modules/
 dist/
 .env
+.env.local
 *.log
 .DS_Store
 .idea/
+
+# Backend specific
+apps/backend/dist/
+
+# Mobile specific
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/node_modules/
+apps/mobile/ios/
+apps/mobile/android/
