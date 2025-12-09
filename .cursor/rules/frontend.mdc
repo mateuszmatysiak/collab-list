@@ -17,6 +17,7 @@ alwaysApply: false
 ### Naming Conventions
 
 - Use lowercase with dashes for directories (e.g., components/auth-wizard).
+- Use uppercase for components (e.g., components/Button.tsx)
 - Favor named exports for components.
 
 ### TypeScript Usage
@@ -31,6 +32,7 @@ alwaysApply: false
 - Use the "function" keyword for pure functions.
 - Use declarative JSX.
 - Use BiomeJS for consistent code formatting.
+- For component props: use `function ComponentName(props: ComponentProps)` syntax, then destructure with `const { specificProps, ...restProps } = props` pattern.
 
 ### UI and Styling
 
