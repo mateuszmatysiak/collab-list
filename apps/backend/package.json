@@ -22,7 +22,6 @@
 		"@hono/zod-validator": "0.7.5",
 		"@ls/shared": "workspace:*",
 		"bcrypt": "6.0.0",
-		"dotenv": "17.2.3",
 		"drizzle-orm": "0.44.7",
 		"hono": "4.10.7",
 		"jsonwebtoken": "9.0.3",
@@ -33,6 +32,7 @@
 		"@types/bcrypt": "6.0.0",
 		"@types/jsonwebtoken": "9.0.10",
 		"@types/node": "22.16.0",
+		"dotenv": "17.2.3",
 		"drizzle-kit": "0.31.7",
 		"tsx": "4.21.0"
 	}

@@ -88,8 +88,11 @@ serve(
 	{
 		fetch: app.fetch,
 		port: Number(port),
+		hostname: "0.0.0.0",
 	},
 	() => {
-		console.log(`Server is running on http://localhost:${Number(port)}`);
+		console.log(`Server is running on http://0.0.0.0:${Number(port)}`);
+		console.log(`Local: http://localhost:${Number(port)}`);
+		console.log(`Network: http://192.168.1.23:${Number(port)}`);
 	},
 );

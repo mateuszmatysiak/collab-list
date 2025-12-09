@@ -1,19 +1,10 @@
-import { z } from "zod";
+import { type BackendEnv, backendEnvSchema } from "@ls/shared/config";
 
-const envSchema = z.object({
-	DATABASE_URL: z.string().min(1),
-	NODE_ENV: z.enum(["development", "production"]).default("development"),
-	JWT_SECRET: z.string().min(32),
-	PORT: z.coerce.number().min(1).max(65535).default(3000),
-});
+let env: BackendEnv;
 
-type Env = z.infer<typeof envSchema>;
-
-let env: Env;
-
-export function getEnv(): Env {
+export function getEnv(): BackendEnv {
 	if (!env) {
-		env = envSchema.parse(process.env);
+		env = backendEnvSchema.parse(process.env);
 	}
 	return env;
 }

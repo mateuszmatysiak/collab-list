@@ -5,7 +5,8 @@
 	"main": "./src/index.ts",
 	"exports": {
 		"./types": "./src/types/index.ts",
-		"./validators": "./src/validators/index.ts"
+		"./validators": "./src/validators/index.ts",
+		"./config": "./src/config/index.ts"
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit"
