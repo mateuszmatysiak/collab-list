@@ -9,7 +9,7 @@
 	},
 	"packageManager": "pnpm@9.15.0",
 	"scripts": {
-		"dev": "pnpm --parallel --filter @ls/backend --filter @ls/mobile dev",
+		"dev": "pnpm dev:backend & pnpm dev:mobile",
 		"dev:backend": "pnpm --filter @ls/backend dev",
 		"dev:mobile": "pnpm --filter @ls/mobile start",
 		"build": "pnpm --recursive run build",
