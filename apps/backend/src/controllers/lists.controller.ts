@@ -1,4 +1,7 @@
-import { createListSchema, updateListSchema } from "@ls/shared/validators";
+import {
+	createListSchema,
+	updateListSchema,
+} from "@collab-list/shared/validators";
 import type { Context } from "hono";
 import { authMiddleware } from "../middleware/auth";
 import {

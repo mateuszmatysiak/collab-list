@@ -1,5 +1,5 @@
 {
-	"name": "@ls/shared",
+	"name": "@collab-list/shared",
 	"version": "1.0.0",
 	"type": "module",
 	"main": "./src/index.ts",

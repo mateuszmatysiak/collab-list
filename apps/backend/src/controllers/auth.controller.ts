@@ -2,7 +2,7 @@ import {
 	loginSchema,
 	refreshTokenSchema,
 	registerSchema,
-} from "@ls/shared/validators";
+} from "@collab-list/shared/validators";
 import type { Context } from "hono";
 import { authMiddleware, optionalAuthMiddleware } from "../middleware/auth";
 import {

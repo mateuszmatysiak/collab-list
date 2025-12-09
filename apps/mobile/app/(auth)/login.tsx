@@ -1,6 +1,6 @@
+import type { LoginRequest } from "@collab-list/shared/validators";
+import { loginSchema } from "@collab-list/shared/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { LoginRequest } from "@ls/shared/validators";
-import { loginSchema } from "@ls/shared/validators";
 import type { AxiosError } from "axios";
 import { router } from "expo-router";
 import { useState } from "react";

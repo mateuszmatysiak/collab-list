@@ -17,15 +17,15 @@ importers:
 
   apps/backend:
     dependencies:
+      '@collab-list/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@hono/node-server':
         specifier: 1.19.6
         version: 1.19.6(hono@4.10.7)
       '@hono/zod-validator':
         specifier: 0.7.5
         version: 0.7.5(hono@4.10.7)(zod@4.1.13)
-      '@ls/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       bcrypt:
         specifier: 6.0.0
         version: 6.0.0
@@ -66,12 +66,12 @@ importers:
 
   apps/mobile:
     dependencies:
+      '@collab-list/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@hookform/resolvers':
         specifier: 5.2.2
         version: 5.2.2(react-hook-form@7.68.0(react@19.2.1))
-      '@ls/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       '@rn-primitives/label':
         specifier: 1.2.0
         version: 1.2.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.2.7)(react@19.2.1))(react@19.2.1)

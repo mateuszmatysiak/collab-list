@@ -1,6 +1,6 @@
+import type { RegisterRequest } from "@collab-list/shared/validators";
+import { registerSchema } from "@collab-list/shared/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { RegisterRequest } from "@ls/shared/validators";
-import { registerSchema } from "@ls/shared/validators";
 import type { AxiosError } from "axios";
 import { router } from "expo-router";
 import { useState } from "react";

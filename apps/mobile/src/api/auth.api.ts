@@ -2,7 +2,7 @@ import type {
 	LoginRequest,
 	RefreshTokenRequest,
 	RegisterRequest,
-} from "@ls/shared/validators";
+} from "@collab-list/shared/validators";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_STALE_TIME_MS } from "@/lib/constants";
 import { apiClient } from "./client";

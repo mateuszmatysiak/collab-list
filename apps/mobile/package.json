@@ -1,5 +1,5 @@
 {
-	"name": "@ls/mobile",
+	"name": "@collab-list/mobile",
 	"version": "1.0.0",
 	"main": "index.ts",
 	"scripts": {
@@ -12,7 +12,7 @@
 	},
 	"dependencies": {
 		"@hookform/resolvers": "5.2.2",
-		"@ls/shared": "workspace:*",
+		"@collab-list/shared": "workspace:*",
 		"@rn-primitives/label": "1.2.0",
 		"@rn-primitives/portal": "1.3.0",
 		"@rn-primitives/slot": "1.2.0",

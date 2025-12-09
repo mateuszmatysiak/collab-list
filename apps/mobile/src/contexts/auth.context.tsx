@@ -1,4 +1,7 @@
-import type { LoginRequest, RegisterRequest } from "@ls/shared/validators";
+import type {
+	LoginRequest,
+	RegisterRequest,
+} from "@collab-list/shared/validators";
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useCallback, useContext } from "react";
 import { useLogin, useLogout, useMe, useRegister } from "@/api/auth.api";

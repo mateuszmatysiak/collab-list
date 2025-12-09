@@ -1,4 +1,4 @@
-import type { ShareListRequest } from "@ls/shared/validators";
+import type { ShareListRequest } from "@collab-list/shared/validators";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "./client";
 import { queryKeys } from "./queryKeys";

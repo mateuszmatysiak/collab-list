@@ -1,4 +1,4 @@
-import { shareListSchema } from "@ls/shared/validators";
+import { shareListSchema } from "@collab-list/shared/validators";
 import type { Context } from "hono";
 import { authMiddleware } from "../middleware/auth";
 import {

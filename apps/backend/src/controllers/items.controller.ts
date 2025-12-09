@@ -1,4 +1,7 @@
-import { createItemSchema, updateItemSchema } from "@ls/shared/validators";
+import {
+	createItemSchema,
+	updateItemSchema,
+} from "@collab-list/shared/validators";
 import type { Context } from "hono";
 import { authMiddleware } from "../middleware/auth";
 import { createItem, deleteItem, updateItem } from "../services/items.service";

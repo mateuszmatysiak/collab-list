@@ -1,7 +1,7 @@
 import type {
 	CreateItemRequest,
 	UpdateItemRequest,
-} from "@ls/shared/validators";
+} from "@collab-list/shared/validators";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "./client";
 import { queryKeys } from "./queryKeys";

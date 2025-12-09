@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"outDir": "./dist",
 		"paths": {
-			"@ls/shared/*": ["../../packages/shared/src/*"]
+			"@collab-list/shared/*": ["../../packages/shared/src/*"]
 		}
 	},
 	"include": ["src/**/*"],
