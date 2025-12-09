@@ -1,22 +1,29 @@
 import axios from "axios";
+import { getEnv } from "@/config/env";
+import {
+	clearTokens,
+	getAccessToken,
+	getRefreshToken,
+	setTokens,
+} from "@/lib/storage";
 
 export const apiClient = axios.create({
-	baseURL: process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000",
+	baseURL: getEnv().EXPO_PUBLIC_API_URL,
 	timeout: 10000,
 	headers: { "Content-Type": "application/json" },
 });
 
-// Interceptor dla JWT tokena
-apiClient.interceptors.request.use((config) => {
-	// TODO: Dodać pobieranie tokena z storage i ustawianie Authorization header
-	// const token = await getStoredToken();
-	// if (token) {
-	//   config.headers.Authorization = `Bearer ${token}`;
-	// }
-	return config;
-});
+apiClient.interceptors.request.use(
+	async (config) => {
+		const accessToken = await getAccessToken();
+		if (accessToken) {
+			config.headers.Authorization = `Bearer ${accessToken}`;
+		}
+		return config;
+	},
+	(error) => Promise.reject(error),
+);
 
-// Interceptor dla refresh token flow
 apiClient.interceptors.response.use(
 	(response) => response,
 	async (error) => {
@@ -25,18 +32,30 @@ apiClient.interceptors.response.use(
 		if (error.response?.status === 401 && !originalRequest._retry) {
 			originalRequest._retry = true;
 
-			// TODO: Implementować refresh token flow
-			// try {
-			//   const refreshToken = await getStoredRefreshToken();
-			//   const response = await axios.post('/api/auth/refresh', { refreshToken });
-			//   const { accessToken } = response.data;
-			//   await storeToken(accessToken);
-			//   originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-			//   return apiClient(originalRequest);
-			// } catch (refreshError) {
-			//   // Wylogować użytkownika
-			//   return Promise.reject(refreshError);
-			// }
+			try {
+				const refreshToken = await getRefreshToken();
+
+				if (!refreshToken) {
+					await clearTokens();
+					return Promise.reject(error);
+				}
+
+				const response = await axios.post(
+					`${apiClient.defaults.baseURL}/api/auth/refresh`,
+					{ refreshToken },
+				);
+
+				const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+					response.data;
+
+				await setTokens(newAccessToken, newRefreshToken);
+
+				originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+				return apiClient(originalRequest);
+			} catch (refreshError) {
+				await clearTokens();
+				return Promise.reject(refreshError);
+			}
 		}
 
 		return Promise.reject(error);

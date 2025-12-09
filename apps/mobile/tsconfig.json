@@ -1,24 +1,11 @@
 {
-  "extends": [
-    "expo/tsconfig.base",
-    "../../tsconfig.base.json"
-  ],
-  "compilerOptions": {
-    "strict": true,
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@ls/shared/*": [
-        "../../packages/shared/src/*"
-      ]
-    }
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+	"extends": ["expo/tsconfig.base", "../../tsconfig.base.json"],
+	"compilerOptions": {
+		"paths": {
+			"@/*": ["./src/*"],
+			"@ls/shared/*": ["../../packages/shared/src/*"]
+		}
+	},
+	"include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts"],
+	"exclude": ["node_modules"]
 }

@@ -3,39 +3,44 @@ import type {
 	RefreshTokenRequest,
 	RegisterRequest,
 } from "@ls/shared/validators";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { QUERY_STALE_TIME_MS } from "@/lib/constants";
 import { apiClient } from "./client";
 
-export const useLogin = () => {
+export function useLogin() {
 	return useMutation({
 		mutationFn: (data: LoginRequest) =>
 			apiClient.post("/api/auth/login", data).then((res) => res.data),
 	});
-};
+}
 
-export const useRegister = () => {
+export function useRegister() {
 	return useMutation({
 		mutationFn: (data: RegisterRequest) =>
 			apiClient.post("/api/auth/register", data).then((res) => res.data),
 	});
-};
+}
 
-export const useRefresh = () => {
+export function useRefresh() {
 	return useMutation({
 		mutationFn: (data: RefreshTokenRequest) =>
 			apiClient.post("/api/auth/refresh", data).then((res) => res.data),
 	});
-};
+}
 
-export const useLogout = () => {
+export function useLogout() {
 	return useMutation({
 		mutationFn: (data: RefreshTokenRequest) =>
 			apiClient.post("/api/auth/logout", data).then((res) => res.data),
 	});
-};
+}
 
-export const useMe = () => {
-	return useMutation({
-		mutationFn: () => apiClient.get("/api/auth/me").then((res) => res.data),
+export function useMe(enabled = true) {
+	return useQuery({
+		queryKey: ["auth", "me"],
+		queryFn: () => apiClient.get("/api/auth/me").then((res) => res.data),
+		enabled,
+		retry: false,
+		staleTime: QUERY_STALE_TIME_MS,
 	});
-};
+}
