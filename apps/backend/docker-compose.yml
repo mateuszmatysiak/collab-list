@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ls_backend
+      POSTGRES_DB: collab_list_backend
     ports:
       - "5432:5432"
     volumes:

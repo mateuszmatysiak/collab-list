@@ -113,7 +113,7 @@ Configuration in `components/ui/` with NativeWind styling.
 
 ### Functionality:
 
-- Validation via `react-hook-form` + zod (`loginSchema` from `@ls/shared/validators`)
+- Validation via `react-hook-form` + zod (`loginSchema` from `@collab-list/shared/validators`)
 - Calls `login()` from AuthContext
 - On success: redirect to `/(tabs)` (or main screen)
 - Error messages from backend (e.g. "Invalid email or password")
@@ -176,7 +176,7 @@ Temporary screen after login:
 
 - Types for User (from backend response)
 - Types for AuthContext
-- Export from `@ls/shared/types` if needed
+- Export from `@collab-list/shared/types` if needed
 
 ## Implementation notes
 

@@ -67,16 +67,16 @@ Moving the entire current project to `apps/backend/`:
 - Source code from `src/`
 - Configurations: `tsconfig.json`, `drizzle.config.ts` (NOT `biome.json` - stays in root)
 - `docker-compose.yml`
-- `package.json` with name `@ls/backend`
+- `package.json` with name `@collab-list/backend`
 
 Updating `apps/backend/package.json`:
 
-- Change name to `@ls/backend`
-- Add dependency on `@ls/shared`
+- Change name to `@collab-list/backend`
+- Add dependency on `@collab-list/shared`
 - Keep all scripts (dev, build, db:*)
 - **NO** BiomeJS and TypeScript in dependencies
 
-## 4. Shared Package (@ls/shared)
+## 4. Shared Package (@collab-list/shared)
 
 Creating `packages/shared/` with:
 
@@ -84,7 +84,7 @@ Creating `packages/shared/` with:
 
 ```json
 {
-  "name": "@ls/shared",
+  "name": "@collab-list/shared",
   "version": "1.0.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -109,7 +109,7 @@ Moving from backend:
 - `src/validators/shares.validator.ts`
 - Types from `src/types/index.ts`
 
-Backend will import from `@ls/shared` instead of local files.
+Backend will import from `@collab-list/shared` instead of local files.
 
 ## 5. Mobile Application (apps/mobile)
 
@@ -124,9 +124,9 @@ npx create-expo-app@latest mobile --template blank-typescript
 
 ```json
 {
-  "name": "@ls/mobile",
+  "name": "@collab-list/mobile",
   "dependencies": {
-    "@ls/shared": "workspace:*",
+    "@collab-list/shared": "workspace:*",
     "axios": "1.13.2",
     "@tanstack/react-query": "5.90.12",
     "expo": "54.0.25",
@@ -176,7 +176,7 @@ apiClient.interceptors.request.use((config) => {
 ```typescript
 import { useMutation } from '@tanstack/react-query';
 import { apiClient } from './client';
-import type { LoginRequest, RegisterRequest } from '@ls/shared/validators';
+import type { LoginRequest, RegisterRequest } from '@collab-list/shared/validators';
 
 export const useLogin = () => {
   return useMutation({
@@ -210,7 +210,7 @@ EXPO_PUBLIC_API_URL=http://localhost:3000
 
 ## 6. Types and Validators Integration
 
-Backend exports from `@ls/shared`:
+Backend exports from `@collab-list/shared`:
 
 - All Request/Response types from API
 - Zod validators (reused in mobile for form validation)
@@ -218,7 +218,7 @@ Backend exports from `@ls/shared`:
 Mobile imports:
 
 ```typescript
-import { loginSchema, type LoginRequest } from '@ls/shared/validators';
+import { loginSchema, type LoginRequest } from '@collab-list/shared/validators';
 import { useLogin } from '@/api/auth.api';
 ```
 
@@ -227,16 +227,16 @@ import { useLogin } from '@/api/auth.api';
 ```json
 {
   "scripts": {
-    "dev": "pnpm --parallel --filter @ls/backend --filter @ls/mobile dev",
-    "dev:backend": "pnpm --filter @ls/backend dev",
-    "dev:mobile": "pnpm --filter @ls/mobile start",
+    "dev": "pnpm --parallel --filter @collab-list/backend --filter @collab-list/mobile dev",
+    "dev:backend": "pnpm --filter @collab-list/backend dev",
+    "dev:mobile": "pnpm --filter @collab-list/mobile start",
     "build": "pnpm --recursive run build",
-    "build:backend": "pnpm --filter @ls/backend build",
+    "build:backend": "pnpm --filter @collab-list/backend build",
     "lint": "biome check --write .",
-    "db:generate": "pnpm --filter @ls/backend db:generate",
-    "db:migrate": "pnpm --filter @ls/backend db:migrate",
-    "db:seed": "pnpm --filter @ls/backend db:seed",
-    "db:studio": "pnpm --filter @ls/backend db:studio"
+    "db:generate": "pnpm --filter @collab-list/backend db:generate",
+    "db:migrate": "pnpm --filter @collab-list/backend db:migrate",
+    "db:seed": "pnpm --filter @collab-list/backend db:seed",
+    "db:studio": "pnpm --filter @collab-list/backend db:studio"
   }
 }
 ```
@@ -319,7 +319,7 @@ Backend `tsconfig.json`:
 {
   "compilerOptions": {
     "paths": {
-      "@ls/shared/*": ["../../packages/shared/src/*"]
+      "@collab-list/shared/*": ["../../packages/shared/src/*"]
     }
   }
 }
@@ -332,7 +332,7 @@ Mobile `tsconfig.json`:
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@ls/shared/*": ["../../packages/shared/src/*"]
+      "@collab-list/shared/*": ["../../packages/shared/src/*"]
     }
   }
 }
@@ -343,7 +343,7 @@ Mobile `tsconfig.json`:
 1. Creating folder structure + root configs (biome.json stays in root)
 2. Shared package - types and validators
 3. Backend migration to apps/backend (without biome.json)
-4. Updating imports in backend (@ls/shared)
+4. Updating imports in backend (@collab-list/shared)
 5. Expo mobile app initialization
 6. Axios + TanStack Query setup
 7. API hooks implementation
