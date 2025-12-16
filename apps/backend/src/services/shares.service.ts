@@ -151,6 +151,16 @@ export async function getListShares(listId: string, userId: string) {
 		}
 	}
 
+	const [author] = await db
+		.select({
+			id: users.id,
+			name: users.name,
+			email: users.email,
+		})
+		.from(users)
+		.where(eq(users.id, list.authorId))
+		.limit(1);
+
 	const shares = await db
 		.select({
 			share: listShares,
@@ -160,12 +170,15 @@ export async function getListShares(listId: string, userId: string) {
 		.innerJoin(users, eq(listShares.userId, users.id))
 		.where(eq(listShares.listId, listId));
 
-	return shares.map(({ share, user }) => ({
-		id: share.id,
-		userId: user.id,
-		userName: user.name,
-		userEmail: user.email,
-		role: share.role,
-		createdAt: share.createdAt,
-	}));
+	return {
+		shares: shares.map(({ share, user }) => ({
+			id: share.id,
+			userId: user.id,
+			userName: user.name,
+			userEmail: user.email,
+			role: share.role,
+			createdAt: share.createdAt,
+		})),
+		author,
+	};
 }

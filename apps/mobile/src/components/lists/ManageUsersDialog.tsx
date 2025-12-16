@@ -1,4 +1,8 @@
-import type { ListWithDetails, ShareWithUser } from "@collab-list/shared/types";
+import type {
+	ListWithDetails,
+	SharesAuthor,
+	ShareWithUser,
+} from "@collab-list/shared/types";
 import { UserPlus, X } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
@@ -40,6 +44,7 @@ export function ManageUsersDialog(props: ManageUsersDialogProps) {
 
 	const { data: sharesData } = useShares(list.id);
 	const shares = (sharesData?.shares as ShareWithUser[]) ?? [];
+	const author = sharesData?.author as SharesAuthor | undefined;
 
 	const { mutate: shareList, isPending: isSharing } = useShareList(list.id);
 
@@ -92,23 +97,18 @@ export function ManageUsersDialog(props: ManageUsersDialogProps) {
 					</DialogDescription>
 				</DialogHeader>
 
-				<ScrollView className="max-h-48">
-					{shares.length === 0 ? (
-						<Text className="text-sm text-muted-foreground py-2">
-							Brak udostępnionych użytkowników
-						</Text>
-					) : (
-						<View className="gap-2">
-							{shares.map((share) => (
-								<ShareItem
-									key={share.id}
-									share={share}
-									listId={list.id}
-									canRemove={isOwner}
-								/>
-							))}
-						</View>
-					)}
+				<ScrollView className="max-h-56">
+					<View className="gap-2">
+						{author && <AuthorItem author={author} />}
+						{shares.map((share) => (
+							<ShareItem
+								key={share.id}
+								share={share}
+								listId={list.id}
+								canRemove={isOwner}
+							/>
+						))}
+					</View>
 				</ScrollView>
 
 				{isOwner && (
@@ -152,6 +152,29 @@ export function ManageUsersDialog(props: ManageUsersDialogProps) {
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+interface AuthorItemProps {
+	author: SharesAuthor;
+}
+
+function AuthorItem(props: AuthorItemProps) {
+	const { author } = props;
+
+	return (
+		<View className="flex-row items-center gap-3 py-1">
+			<UserAvatar name={author.name} size="sm" />
+			<View className="flex-1">
+				<View className="flex-row items-center gap-2">
+					<Text className="text-sm font-medium">{author.name}</Text>
+					<View className="bg-primary/10 px-2 py-0.5 rounded">
+						<Text className="text-xs text-primary font-medium">Autor</Text>
+					</View>
+				</View>
+				<Text className="text-xs text-muted-foreground">{author.email}</Text>
+			</View>
+		</View>
 	);
 }
 

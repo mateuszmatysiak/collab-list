@@ -1,4 +1,8 @@
-import type { ListShareUser, ListWithDetails } from "@collab-list/shared/types";
+import type {
+	ListShareUser,
+	ListWithDetails,
+	SharesResponse,
+} from "@collab-list/shared/types";
 import type { ShareListRequest } from "@collab-list/shared/validators";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "./client";
@@ -19,7 +23,9 @@ export const useShares = (listId: string) => {
 	return useQuery({
 		queryKey: queryKeys.lists.shares(listId),
 		queryFn: () =>
-			apiClient.get(`/api/lists/${listId}/shares`).then((res) => res.data),
+			apiClient
+				.get<SharesResponse>(`/api/lists/${listId}/shares`)
+				.then((res) => res.data),
 	});
 };
 

@@ -41,8 +41,8 @@ export const getListSharesController = [
 		const userId = c.get("userId");
 		const listId = c.req.param("id");
 
-		const shares = await getListShares(listId, userId);
+		const result = await getListShares(listId, userId);
 
-		return c.json({ shares });
+		return c.json(result);
 	},
 ];

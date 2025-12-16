@@ -76,3 +76,14 @@ export interface ShareWithUser {
 	role: ListRole;
 	createdAt: Date;
 }
+
+export interface SharesAuthor {
+	id: string;
+	name: string;
+	email: string;
+}
+
+export interface SharesResponse {
+	shares: ShareWithUser[];
+	author: SharesAuthor;
+}
