@@ -1,3 +1,4 @@
+import type { ListWithDetails } from "@collab-list/shared/types";
 import type {
 	CreateListRequest,
 	UpdateListRequest,
@@ -7,16 +8,23 @@ import { apiClient } from "./client";
 import { queryKeys } from "./queryKeys";
 
 export const useLists = () => {
-	return useQuery({
+	return useQuery<ListWithDetails[]>({
 		queryKey: queryKeys.lists.all,
-		queryFn: () => apiClient.get("/api/lists").then((res) => res.data),
+		queryFn: () =>
+			apiClient
+				.get<{ lists: ListWithDetails[] }>("/api/lists")
+				.then((res) => res.data.lists),
 	});
 };
 
-export const useList = (id: string) => {
-	return useQuery({
-		queryKey: queryKeys.lists.detail(id),
-		queryFn: () => apiClient.get(`/api/lists/${id}`).then((res) => res.data),
+export const useList = (id: string | undefined) => {
+	return useQuery<ListWithDetails>({
+		queryKey: queryKeys.lists.detail(id ?? ""),
+		queryFn: () =>
+			apiClient
+				.get<{ list: ListWithDetails }>(`/api/lists/${id}`)
+				.then((res) => res.data.list),
+		enabled: !!id,
 	});
 };
 
@@ -25,9 +33,21 @@ export const useCreateList = () => {
 
 	return useMutation({
 		mutationFn: (data: CreateListRequest) =>
-			apiClient.post("/api/lists", data).then((res) => res.data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.lists.all });
+			apiClient
+				.post<{ list: ListWithDetails }>("/api/lists", data)
+				.then((res) => res.data),
+		onSuccess: (data) => {
+			const newList: ListWithDetails = {
+				...data.list,
+				itemsCount: 0,
+				completedCount: 0,
+				sharesCount: 0,
+				shares: [],
+				role: "owner",
+			};
+			queryClient.setQueryData<ListWithDetails[]>(queryKeys.lists.all, (old) =>
+				old ? [...old, newList] : [newList],
+			);
 		},
 	});
 };
@@ -37,10 +57,15 @@ export const useUpdateList = (id: string) => {
 
 	return useMutation({
 		mutationFn: (data: UpdateListRequest) =>
-			apiClient.put(`/api/lists/${id}`, data).then((res) => res.data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.lists.all });
-			queryClient.invalidateQueries({ queryKey: queryKeys.lists.detail(id) });
+			apiClient.patch(`/api/lists/${id}`, data).then((res) => res.data),
+		onSuccess: (_data, variables) => {
+			queryClient.setQueryData<ListWithDetails[]>(queryKeys.lists.all, (old) =>
+				old?.map((list) => (list.id === id ? { ...list, ...variables } : list)),
+			);
+			queryClient.setQueryData<ListWithDetails>(
+				queryKeys.lists.detail(id),
+				(old) => (old ? { ...old, ...variables } : old),
+			);
 		},
 	});
 };
@@ -52,7 +77,10 @@ export const useDeleteList = (id: string) => {
 		mutationFn: () =>
 			apiClient.delete(`/api/lists/${id}`).then((res) => res.data),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.lists.all });
+			queryClient.setQueryData<ListWithDetails[]>(queryKeys.lists.all, (old) =>
+				old?.filter((list) => list.id !== id),
+			);
+			queryClient.removeQueries({ queryKey: queryKeys.lists.detail(id) });
 		},
 	});
 };
