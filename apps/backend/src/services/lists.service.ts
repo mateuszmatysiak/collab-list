@@ -1,6 +1,7 @@
+import type { ListRole } from "@collab-list/shared/types";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "../db/index";
-import { listItems, listShares, lists } from "../db/schema";
+import { listItems, listShares, lists, users } from "../db/schema";
 import { ForbiddenError, NotFoundError } from "../utils/errors";
 
 export async function createList(userId: string, name: string) {
@@ -18,7 +19,7 @@ export async function createList(userId: string, name: string) {
 async function checkListAccess(
 	listId: string,
 	userId: string,
-): Promise<"owner" | "editor" | null> {
+): Promise<ListRole | null> {
 	const [list] = await db
 		.select()
 		.from(lists)
@@ -74,20 +75,21 @@ export async function getListById(listId: string, userId: string) {
 	const itemsCount = itemsResult[0]?.total || 0;
 	const completedCount = itemsResult[0]?.completed || 0;
 
-	const sharesResult = await db
+	const sharesData = await db
 		.select({
-			count: sql<number>`count(*)::int`,
+			userId: listShares.userId,
+			userName: users.name,
 		})
 		.from(listShares)
+		.innerJoin(users, eq(listShares.userId, users.id))
 		.where(eq(listShares.listId, listId));
-
-	const sharesCount = sharesResult[0]?.count || 0;
 
 	return {
 		...list,
 		itemsCount,
 		completedCount,
-		sharesCount,
+		sharesCount: sharesData.length,
+		shares: sharesData,
 		role: access,
 	};
 }
@@ -125,20 +127,21 @@ export async function getUserLists(userId: string) {
 			const itemsCount = itemsResult[0]?.total || 0;
 			const completedCount = itemsResult[0]?.completed || 0;
 
-			const sharesResult = await db
+			const sharesData = await db
 				.select({
-					count: sql<number>`count(*)::int`,
+					userId: listShares.userId,
+					userName: users.name,
 				})
 				.from(listShares)
+				.innerJoin(users, eq(listShares.userId, users.id))
 				.where(eq(listShares.listId, list.id));
-
-			const sharesCount = sharesResult[0]?.count || 0;
 
 			return {
 				...list,
 				itemsCount,
 				completedCount,
-				sharesCount,
+				sharesCount: sharesData.length,
+				shares: sharesData,
 				role,
 			};
 		}),
@@ -172,14 +175,18 @@ export async function updateList(listId: string, userId: string, name: string) {
 }
 
 export async function deleteList(listId: string, userId: string) {
-	const access = await checkListAccess(listId, userId);
+	const [list] = await db
+		.select()
+		.from(lists)
+		.where(eq(lists.id, listId))
+		.limit(1);
 
-	if (!access) {
+	if (!list) {
 		throw new NotFoundError("Nie znaleziono listy");
 	}
 
-	if (access !== "owner") {
-		throw new ForbiddenError("Tylko właściciel może usunąć tę listę");
+	if (list.authorId !== userId) {
+		throw new ForbiddenError("Tylko autor może usunąć tę listę");
 	}
 
 	await db.delete(lists).where(eq(lists.id, listId));

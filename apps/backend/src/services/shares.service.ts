@@ -84,7 +84,10 @@ export async function shareList(
 		})
 		.returning();
 
-	return share;
+	return {
+		...share,
+		userName: targetUser.name,
+	};
 }
 
 export async function removeShare(

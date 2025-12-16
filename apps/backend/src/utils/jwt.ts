@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
+import type { AuthTokens, JWTPayload } from "@collab-list/shared/types";
 import jwt from "jsonwebtoken";
 import { getEnv } from "../config/env";
-import type { AuthTokens, JWTPayload } from "../types/index";
 
 const ACCESS_TOKEN_EXPIRES_IN = "15m"; // 15 minutes
 const REFRESH_TOKEN_EXPIRES_IN_MS = 30 * 24 * 60 * 60 * 1000; // 30 days

@@ -10,8 +10,8 @@
 	"scripts": {
 		"dev": "tsx watch --env-file=.env src/index.ts",
 		"build": "tsc",
-		"typecheck": "tsc --noEmit",
 		"start": "node --env-file=.env dist/index.js",
+		"typecheck": "tsc --noEmit",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:seed": "tsx --env-file=.env src/db/seed.ts",
@@ -31,7 +31,6 @@
 	"devDependencies": {
 		"@types/bcrypt": "6.0.0",
 		"@types/jsonwebtoken": "9.0.10",
-		"@types/node": "22.16.0",
 		"dotenv": "17.2.3",
 		"drizzle-kit": "0.31.7",
 		"tsx": "4.21.0"

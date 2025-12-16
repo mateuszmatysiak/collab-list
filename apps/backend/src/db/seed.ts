@@ -1,32 +1,25 @@
-import { eq } from "drizzle-orm";
 import { hashPassword } from "../utils/password";
 import { db } from "./index";
-import { listItems, listShares, lists, users } from "./schema";
+import { listItems, listShares, lists, refreshTokens, users } from "./schema";
 
 async function seed() {
-	console.log(
-		"🌱 Rozpoczynam wypełnianie bazy danych przykładowymi danymi...\n",
-	);
+	console.log("🌱 Rozpoczynam resetowanie i wypełnianie bazy danych...\n");
 
 	try {
-		// Sprawdź czy przykładowi użytkownicy już istnieją
-		const existingUser1 = await db
-			.select()
-			.from(users)
-			.where(eq(users.email, "jan@example.com"))
-			.limit(1);
+		// Resetowanie bazy danych
+		console.log("🗑️  Czyszczenie istniejących danych...");
+		await db.delete(refreshTokens);
+		await db.delete(listItems);
+		await db.delete(listShares);
+		await db.delete(lists);
+		await db.delete(users);
+		console.log("   ✓ Baza danych wyczyszczona\n");
 
-		if (existingUser1.length > 0) {
-			console.log("⚠️  Przykładowe dane już istnieją w bazie danych.");
-			console.log("   Skrypt został pominięty, aby uniknąć duplikatów.\n");
-			return;
-		}
-
-		// Tworzenie przykładowych użytkowników
-		console.log("👤 Tworzenie przykładowych użytkowników...");
+		// Tworzenie użytkowników
+		console.log("👤 Tworzenie użytkowników...");
 		const passwordHash = await hashPassword("haslo123");
 
-		const [user1] = await db
+		const [jan] = await db
 			.insert(users)
 			.values({
 				name: "Jan Kowalski",
@@ -35,9 +28,7 @@ async function seed() {
 			})
 			.returning();
 
-		if (!user1) throw new Error("Nie udało się utworzyć user1");
-
-		const [user2] = await db
+		const [anna] = await db
 			.insert(users)
 			.values({
 				name: "Anna Nowak",
@@ -46,9 +37,7 @@ async function seed() {
 			})
 			.returning();
 
-		if (!user2) throw new Error("Nie udało się utworzyć user2");
-
-		const [user3] = await db
+		const [piotr] = await db
 			.insert(users)
 			.values({
 				name: "Piotr Wiśniewski",
@@ -57,168 +46,218 @@ async function seed() {
 			})
 			.returning();
 
-		if (!user3) throw new Error("Nie udało się utworzyć user3");
-
-		console.log(`   ✓ Utworzono 3 użytkowników\n`);
-
-		// Tworzenie przykładowych list
-		console.log("📋 Tworzenie przykładowych list...");
-
-		const [list1] = await db
-			.insert(lists)
+		const [maria] = await db
+			.insert(users)
 			.values({
-				name: "Zakupy spożywcze",
-				authorId: user1.id,
+				name: "Maria Zielińska",
+				email: "maria@example.com",
+				passwordHash,
 			})
 			.returning();
 
-		if (!list1) throw new Error("Nie udało się utworzyć list1");
+		if (!jan || !anna || !piotr || !maria) {
+			throw new Error("Nie udało się utworzyć użytkowników");
+		}
 
-		const [list2] = await db
+		console.log(`   ✓ Utworzono 4 użytkowników\n`);
+
+		// ========== LISTY JANA ==========
+		console.log("📋 Tworzenie list dla Jana...");
+
+		const [janZakupy] = await db
 			.insert(lists)
-			.values({
-				name: "Zadania do wykonania",
-				authorId: user1.id,
-			})
+			.values({ name: "Zakupy spożywcze", authorId: jan.id })
 			.returning();
 
-		if (!list2) throw new Error("Nie udało się utworzyć list2");
-
-		const [list3] = await db
+		const [janZadania] = await db
 			.insert(lists)
-			.values({
-				name: "Prezenty na urodziny",
-				authorId: user2.id,
-			})
+			.values({ name: "Zadania domowe", authorId: jan.id })
 			.returning();
 
-		if (!list3) throw new Error("Nie udało się utworzyć list3");
-
-		const [list4] = await db
+		const [janProjekt] = await db
 			.insert(lists)
-			.values({
-				name: "Projekty do zrealizowania",
-				authorId: user2.id,
-			})
+			.values({ name: "Projekt zespołowy", authorId: jan.id })
 			.returning();
 
-		if (!list4) throw new Error("Nie udało się utworzyć list4");
+		if (!janZakupy || !janZadania || !janProjekt) {
+			throw new Error("Nie udało się utworzyć list Jana");
+		}
 
-		console.log(`   ✓ Utworzono 4 listy\n`);
+		// Elementy list Jana
+		await db.insert(listItems).values([
+			{ listId: janZakupy.id, title: "Chleb", isCompleted: true },
+			{ listId: janZakupy.id, title: "Mleko", isCompleted: false },
+			{ listId: janZakupy.id, title: "Jajka", isCompleted: false },
+			{ listId: janZakupy.id, title: "Ser żółty", isCompleted: true },
+			{ listId: janZadania.id, title: "Posprzątać pokój", isCompleted: false },
+			{ listId: janZadania.id, title: "Wynieść śmieci", isCompleted: true },
+			{ listId: janZadania.id, title: "Umyć naczynia", isCompleted: false },
+			{
+				listId: janProjekt.id,
+				title: "Przygotować prezentację",
+				isCompleted: false,
+			},
+			{ listId: janProjekt.id, title: "Wysłać raport", isCompleted: true },
+			{
+				listId: janProjekt.id,
+				title: "Spotkanie z zespołem",
+				isCompleted: false,
+			},
+		]);
 
-		// Tworzenie przykładowych elementów list
-		console.log("✅ Tworzenie przykładowych elementów list...");
+		// Udostępnienia list Jana
+		await db.insert(listShares).values([
+			{ listId: janZakupy.id, userId: anna.id, role: "editor" },
+			{ listId: janZakupy.id, userId: piotr.id, role: "editor" },
+			{ listId: janProjekt.id, userId: anna.id, role: "editor" },
+			{ listId: janProjekt.id, userId: maria.id, role: "editor" },
+		]);
+
+		console.log(`   ✓ 3 listy, 10 elementów, 4 udostępnienia\n`);
+
+		// ========== LISTY ANNY ==========
+		console.log("📋 Tworzenie list dla Anny...");
+
+		const [annaUrodziny] = await db
+			.insert(lists)
+			.values({ name: "Prezenty urodzinowe", authorId: anna.id })
+			.returning();
+
+		const [annaWakacje] = await db
+			.insert(lists)
+			.values({ name: "Lista na wakacje", authorId: anna.id })
+			.returning();
+
+		if (!annaUrodziny || !annaWakacje) {
+			throw new Error("Nie udało się utworzyć list Anny");
+		}
 
 		await db.insert(listItems).values([
+			{ listId: annaUrodziny.id, title: "Książka dla mamy", isCompleted: true },
 			{
-				listId: list1.id,
-				title: "Chleb",
+				listId: annaUrodziny.id,
+				title: "Perfumy dla taty",
 				isCompleted: false,
 			},
 			{
-				listId: list1.id,
-				title: "Mleko",
-				isCompleted: true,
-			},
-			{
-				listId: list1.id,
-				title: "Jajka",
+				listId: annaUrodziny.id,
+				title: "Zabawka dla siostrzeńca",
 				isCompleted: false,
 			},
-			{
-				listId: list1.id,
-				title: "Masło",
-				isCompleted: false,
-			},
-			{
-				listId: list2.id,
-				title: "Zadzwonić do dentysty",
-				isCompleted: false,
-			},
-			{
-				listId: list2.id,
-				title: "Odebrać paczkę",
-				isCompleted: true,
-			},
-			{
-				listId: list2.id,
-				title: "Zapłacić rachunki",
-				isCompleted: false,
-			},
-			{
-				listId: list3.id,
-				title: "Książka",
-				isCompleted: false,
-			},
-			{
-				listId: list3.id,
-				title: "Koszulka",
-				isCompleted: false,
-			},
-			{
-				listId: list3.id,
-				title: "Kwiaty",
-				isCompleted: true,
-			},
-			{
-				listId: list4.id,
-				title: "Zaktualizować dokumentację",
-				isCompleted: false,
-			},
-			{
-				listId: list4.id,
-				title: "Przeprowadzić testy",
-				isCompleted: false,
-			},
-			{
-				listId: list4.id,
-				title: "Code review",
-				isCompleted: true,
-			},
+			{ listId: annaWakacje.id, title: "Paszport", isCompleted: true },
+			{ listId: annaWakacje.id, title: "Krem z filtrem", isCompleted: true },
+			{ listId: annaWakacje.id, title: "Ładowarka", isCompleted: false },
+			{ listId: annaWakacje.id, title: "Apteczka", isCompleted: false },
 		]);
-
-		console.log(`   ✓ Utworzono 13 elementów list\n`);
-
-		// Tworzenie przykładowych udostępnień
-		console.log("🔗 Tworzenie przykładowych udostępnień...");
 
 		await db.insert(listShares).values([
-			{
-				listId: list1.id,
-				userId: user2.id,
-				role: "editor",
-			},
-			{
-				listId: list1.id,
-				userId: user3.id,
-				role: "editor",
-			},
-			{
-				listId: list2.id,
-				userId: user2.id,
-				role: "owner",
-			},
-			{
-				listId: list3.id,
-				userId: user1.id,
-				role: "editor",
-			},
-			{
-				listId: list4.id,
-				userId: user3.id,
-				role: "editor",
-			},
+			{ listId: annaUrodziny.id, userId: jan.id, role: "editor" },
+			{ listId: annaWakacje.id, userId: piotr.id, role: "editor" },
+			{ listId: annaWakacje.id, userId: maria.id, role: "editor" },
 		]);
 
-		console.log(`   ✓ Utworzono 5 udostępnień\n`);
+		console.log(`   ✓ 2 listy, 7 elementów, 3 udostępnienia\n`);
 
-		console.log(
-			"✨ Baza danych została pomyślnie wypełniona przykładowymi danymi!\n",
-		);
-		console.log("📝 Przykładowe konta użytkowników:");
-		console.log("   - jan@example.com / haslo123");
-		console.log("   - anna@example.com / haslo123");
-		console.log("   - piotr@example.com / haslo123\n");
+		// ========== LISTY PIOTRA ==========
+		console.log("📋 Tworzenie list dla Piotra...");
+
+		const [piotrTrening] = await db
+			.insert(lists)
+			.values({ name: "Plan treningowy", authorId: piotr.id })
+			.returning();
+
+		const [piotrKsiazki] = await db
+			.insert(lists)
+			.values({ name: "Książki do przeczytania", authorId: piotr.id })
+			.returning();
+
+		const [piotrRemont] = await db
+			.insert(lists)
+			.values({ name: "Remont mieszkania", authorId: piotr.id })
+			.returning();
+
+		if (!piotrTrening || !piotrKsiazki || !piotrRemont) {
+			throw new Error("Nie udało się utworzyć list Piotra");
+		}
+
+		await db.insert(listItems).values([
+			{ listId: piotrTrening.id, title: "Bieganie 5km", isCompleted: true },
+			{ listId: piotrTrening.id, title: "Siłownia", isCompleted: false },
+			{ listId: piotrTrening.id, title: "Joga", isCompleted: false },
+			{
+				listId: piotrKsiazki.id,
+				title: "Władca Pierścieni",
+				isCompleted: true,
+			},
+			{ listId: piotrKsiazki.id, title: "Dune", isCompleted: false },
+			{ listId: piotrKsiazki.id, title: "1984", isCompleted: false },
+			{ listId: piotrRemont.id, title: "Kupić farbę", isCompleted: true },
+			{ listId: piotrRemont.id, title: "Pomalować ściany", isCompleted: false },
+			{ listId: piotrRemont.id, title: "Wymienić podłogę", isCompleted: false },
+			{ listId: piotrRemont.id, title: "Nowe meble", isCompleted: false },
+		]);
+
+		await db.insert(listShares).values([
+			{ listId: piotrTrening.id, userId: jan.id, role: "editor" },
+			{ listId: piotrRemont.id, userId: anna.id, role: "editor" },
+			{ listId: piotrRemont.id, userId: maria.id, role: "editor" },
+		]);
+
+		console.log(`   ✓ 3 listy, 10 elementów, 3 udostępnienia\n`);
+
+		// ========== LISTY MARII ==========
+		console.log("📋 Tworzenie list dla Marii...");
+
+		const [mariaEventy] = await db
+			.insert(lists)
+			.values({ name: "Organizacja eventu", authorId: maria.id })
+			.returning();
+
+		const [mariaPrzepisy] = await db
+			.insert(lists)
+			.values({ name: "Przepisy kulinarne", authorId: maria.id })
+			.returning();
+
+		if (!mariaEventy || !mariaPrzepisy) {
+			throw new Error("Nie udało się utworzyć list Marii");
+		}
+
+		await db.insert(listItems).values([
+			{ listId: mariaEventy.id, title: "Zarezerwować salę", isCompleted: true },
+			{ listId: mariaEventy.id, title: "Zamówić catering", isCompleted: true },
+			{
+				listId: mariaEventy.id,
+				title: "Wysłać zaproszenia",
+				isCompleted: false,
+			},
+			{ listId: mariaEventy.id, title: "DJ na imprezę", isCompleted: false },
+			{ listId: mariaPrzepisy.id, title: "Sernik", isCompleted: true },
+			{ listId: mariaPrzepisy.id, title: "Pierogi", isCompleted: false },
+			{ listId: mariaPrzepisy.id, title: "Bigos", isCompleted: false },
+		]);
+
+		await db.insert(listShares).values([
+			{ listId: mariaEventy.id, userId: jan.id, role: "editor" },
+			{ listId: mariaEventy.id, userId: anna.id, role: "editor" },
+			{ listId: mariaEventy.id, userId: piotr.id, role: "editor" },
+			{ listId: mariaPrzepisy.id, userId: anna.id, role: "editor" },
+		]);
+
+		console.log(`   ✓ 2 listy, 7 elementów, 4 udostępnienia\n`);
+
+		// Podsumowanie
+		console.log("✨ Baza danych została zresetowana i wypełniona!\n");
+		console.log("📊 Podsumowanie:");
+		console.log("   - 4 użytkowników");
+		console.log("   - 10 list");
+		console.log("   - 34 elementy list");
+		console.log("   - 14 udostępnień\n");
+		console.log("📝 Konta użytkowników (hasło: haslo123):");
+		console.log("   - jan@example.com");
+		console.log("   - anna@example.com");
+		console.log("   - piotr@example.com");
+		console.log("   - maria@example.com\n");
+		process.exit(0);
 	} catch (error) {
 		console.error("❌ Błąd podczas wypełniania bazy danych:", error);
 		process.exit(1);

@@ -1,3 +1,4 @@
+import type { ListRole } from "@collab-list/shared/types";
 import { and, eq } from "drizzle-orm";
 import { db } from "../db/index";
 import { listItems, listShares, lists } from "../db/schema";
@@ -6,7 +7,7 @@ import { ForbiddenError, NotFoundError } from "../utils/errors";
 async function checkListAccess(
 	listId: string,
 	userId: string,
-): Promise<"owner" | "editor" | null> {
+): Promise<ListRole | null> {
 	const [list] = await db
 		.select()
 		.from(lists)
