@@ -16,6 +16,7 @@ import type { ApiErrorResponse } from "@/types/api";
 
 export default function RegisterScreen() {
 	const { register } = useAuth();
+
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 

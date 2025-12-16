@@ -16,6 +16,7 @@ import type { ApiErrorResponse } from "@/types/api";
 
 export default function LoginScreen() {
 	const { login } = useAuth();
+
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
