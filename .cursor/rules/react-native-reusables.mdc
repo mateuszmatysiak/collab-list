@@ -1,6 +1,6 @@
 ---
 description: React Native Reusables (shadcn/ui for React Native) when designing to ensure consistent styling
-globs: *.tsx
+globs: *.tsx,*.ts
 alwaysApply: false
 ---
 # React Native Reusables Rules
