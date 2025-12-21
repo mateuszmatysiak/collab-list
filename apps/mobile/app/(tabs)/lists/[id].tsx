@@ -1,20 +1,21 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
+import { useState } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useList } from "@/api/lists.api";
-import { ManageListDialog } from "@/components/lists/ManageListDialog";
+import {
+	type ItemFilter,
+	ItemFilters,
+} from "@/components/lists/list-page/ItemFilters";
+import { ListItemsContent } from "@/components/lists/list-page/ListItemsContent";
 import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
 
 export default function ListDetailScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
-
-	const { data: list, isLoading, isError, refetch } = useList(id);
-
-	function handleBack() {
-		router.back();
-	}
+	const { data: list, isLoading, isError } = useList(id);
+	const [filter, setFilter] = useState<ItemFilter>("all");
 
 	if (!id) {
 		return (
@@ -28,48 +29,44 @@ export default function ListDetailScreen() {
 		);
 	}
 
+	if (isLoading) {
+		return (
+			<SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+				<View className="flex-1 items-center justify-center">
+					<ActivityIndicator size="large" />
+				</View>
+			</SafeAreaView>
+		);
+	}
+
+	if (isError || !list) {
+		return (
+			<SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+				<View className="flex-1 items-center justify-center gap-2 px-6">
+					<Text className="text-lg font-medium text-destructive">
+						Błąd ładowania listy
+					</Text>
+				</View>
+			</SafeAreaView>
+		);
+	}
+
 	return (
 		<SafeAreaView className="flex-1 bg-background" edges={["top"]}>
-			<View className="flex-row items-center gap-3 px-4 py-4 border-b border-border">
+			<View className="flex-row items-center gap-3 px-4 py-3">
 				<Pressable
-					onPress={handleBack}
+					onPress={() => router.back()}
 					className="size-10 items-center justify-center rounded-full active:bg-accent"
+					hitSlop={8}
 				>
 					<Icon as={ArrowLeft} className="text-foreground" size={20} />
 				</Pressable>
-				<Text className="text-lg font-semibold flex-1" numberOfLines={1}>
-					{isLoading ? "Ładowanie..." : (list?.name ?? "Lista")}
-				</Text>
-				{list && <ManageListDialog list={list} />}
+				<Text className="flex-1 text-xl font-bold">{list.name}</Text>
 			</View>
 
-			<View className="flex-1 p-6">
-				{isLoading ? (
-					<View className="flex-1 items-center justify-center">
-						<ActivityIndicator size="large" />
-					</View>
-				) : isError ? (
-					<View className="flex-1 items-center justify-center gap-2">
-						<Text className="text-lg font-medium text-destructive">
-							Błąd ładowania listy
-						</Text>
-						<Pressable onPress={() => refetch()}>
-							<Text className="text-primary underline">Spróbuj ponownie</Text>
-						</Pressable>
-					</View>
-				) : (
-					<View className="gap-4">
-						<View className="gap-2">
-							<Text className="text-sm text-muted-foreground">Nazwa</Text>
-							<Text className="text-base font-medium">{list?.name}</Text>
-						</View>
-						<View className="gap-2">
-							<Text className="text-sm text-muted-foreground">ID</Text>
-							<Text className="text-base font-medium">{list?.id}</Text>
-						</View>
-					</View>
-				)}
-			</View>
+			<ItemFilters filter={filter} onFilterChange={setFilter} />
+
+			<ListItemsContent listId={id} filter={filter} />
 		</SafeAreaView>
 	);
 }

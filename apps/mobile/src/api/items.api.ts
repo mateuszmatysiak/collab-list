@@ -1,3 +1,4 @@
+import type { ListItem } from "@collab-list/shared/types";
 import type {
 	CreateItemRequest,
 	UpdateItemRequest,
@@ -7,10 +8,12 @@ import { apiClient } from "./client";
 import { queryKeys } from "./queryKeys";
 
 export const useItems = (listId: string) => {
-	return useQuery({
+	return useQuery<ListItem[]>({
 		queryKey: queryKeys.lists.items(listId),
 		queryFn: () =>
-			apiClient.get(`/api/lists/${listId}/items`).then((res) => res.data),
+			apiClient
+				.get<{ items: ListItem[] }>(`/api/lists/${listId}/items`)
+				.then((res) => res.data.items),
 	});
 };
 
@@ -20,12 +23,13 @@ export const useCreateItem = (listId: string) => {
 	return useMutation({
 		mutationFn: (data: CreateItemRequest) =>
 			apiClient
-				.post(`/api/lists/${listId}/items`, data)
-				.then((res) => res.data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.lists.items(listId),
-			});
+				.post<{ item: ListItem }>(`/api/lists/${listId}/items`, data)
+				.then((res) => res.data.item),
+		onSuccess: (newItem) => {
+			queryClient.setQueryData<ListItem[]>(
+				queryKeys.lists.items(listId),
+				(oldItems = []) => [...oldItems, newItem],
+			);
 		},
 	});
 };
@@ -36,12 +40,14 @@ export const useUpdateItem = (listId: string, itemId: string) => {
 	return useMutation({
 		mutationFn: (data: UpdateItemRequest) =>
 			apiClient
-				.put(`/api/lists/${listId}/items/${itemId}`, data)
-				.then((res) => res.data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.lists.items(listId),
-			});
+				.patch<{ item: ListItem }>(`/api/lists/${listId}/items/${itemId}`, data)
+				.then((res) => res.data.item),
+		onSuccess: (updatedItem) => {
+			queryClient.setQueryData<ListItem[]>(
+				queryKeys.lists.items(listId),
+				(oldItems = []) =>
+					oldItems.map((item) => (item.id === itemId ? updatedItem : item)),
+			);
 		},
 	});
 };
@@ -55,9 +61,10 @@ export const useDeleteItem = (listId: string, itemId: string) => {
 				.delete(`/api/lists/${listId}/items/${itemId}`)
 				.then((res) => res.data),
 		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.lists.items(listId),
-			});
+			queryClient.setQueryData<ListItem[]>(
+				queryKeys.lists.items(listId),
+				(oldItems = []) => oldItems.filter((item) => item.id !== itemId),
+			);
 		},
 	});
 };
