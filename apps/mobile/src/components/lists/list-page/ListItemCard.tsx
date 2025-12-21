@@ -1,6 +1,6 @@
 import type { ListItem } from "@collab-list/shared/types";
 import * as LucideIcons from "lucide-react-native";
-import { X } from "lucide-react-native";
+import { GripVertical, X } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, View } from "react-native";
 import { useDeleteItem, useUpdateItem } from "@/api/items.api";
@@ -25,10 +25,13 @@ function getCategoryIcon(
 interface ListItemCardProps {
 	item: ListItem;
 	listId: string;
+	isActive?: boolean;
+	onDragStart?: () => void;
+	onDragEnd?: () => void;
 }
 
 export function ListItemCard(props: ListItemCardProps) {
-	const { item, listId } = props;
+	const { item, listId, isActive, onDragStart, onDragEnd } = props;
 
 	const [isEditingTitle, setIsEditingTitle] = useState(false);
 	const [isEditingDescription, setIsEditingDescription] = useState(false);
@@ -104,8 +107,18 @@ export function ListItemCard(props: ListItemCardProps) {
 			className={cn(
 				"flex-row items-center gap-3 px-4 py-3",
 				item.isCompleted && "bg-muted",
+				isActive && "opacity-90 shadow-lg",
 			)}
 		>
+			<Pressable
+				onPressIn={onDragStart}
+				onPressOut={onDragEnd}
+				className="size-8 items-center justify-center"
+				hitSlop={8}
+			>
+				<Icon as={GripVertical} className="text-muted-foreground" size={18} />
+			</Pressable>
+
 			<Checkbox
 				checked={item.isCompleted}
 				onCheckedChange={handleCheckboxChange}

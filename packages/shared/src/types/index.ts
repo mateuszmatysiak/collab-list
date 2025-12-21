@@ -21,6 +21,7 @@ export interface ListItem {
 	isCompleted: boolean;
 	categoryId: string | null;
 	categoryIcon: string | null;
+	position: number;
 	createdAt: Date;
 }
 

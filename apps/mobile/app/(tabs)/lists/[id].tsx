@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useItems } from "@/api/items.api";
 import { useList } from "@/api/lists.api";
 import { CategoryFilters } from "@/components/lists/list-page/CategoryFilters";
 import {
@@ -13,10 +14,27 @@ import { ListItemsContent } from "@/components/lists/list-page/ListItemsContent"
 import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
 
-function ListDetailContent(props: { id: string }) {
+interface ListDetailContentProps {
+	id: string;
+}
+
+function ListDetailContent(props: ListDetailContentProps) {
 	const { id } = props;
 
-	const { data: list, isLoading, isError } = useList(id);
+	const {
+		data: list,
+		isLoading: isListLoading,
+		isError: isListError,
+		refetch: refetchList,
+	} = useList(id);
+	const {
+		data: items,
+		isLoading: isItemsLoading,
+		isError: isItemsError,
+		isRefetching,
+		refetch: refetchItems,
+	} = useItems(id);
+
 	const [filter, setFilter] = useState<ItemFilter>("all");
 	const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
 		null,
@@ -34,6 +52,14 @@ function ListDetailContent(props: { id: string }) {
 		router.back();
 	}, []);
 
+	const handleRefresh = useCallback(() => {
+		refetchItems();
+		refetchList();
+	}, [refetchItems, refetchList]);
+
+	const isLoading = isListLoading || isItemsLoading;
+	const isError = isListError || isItemsError;
+
 	if (isLoading) {
 		return (
 			<View className="flex-1 items-center justify-center">
@@ -42,12 +68,35 @@ function ListDetailContent(props: { id: string }) {
 		);
 	}
 
-	if (isError || !list) {
+	if (!list) {
+		return (
+			<View className="flex-1 items-center justify-center">
+				<Text className="text-lg font-medium text-destructive">
+					Lista nie znaleziona
+				</Text>
+			</View>
+		);
+	}
+
+	if (!items) {
+		return (
+			<View className="flex-1 items-center justify-center">
+				<Text className="text-lg font-medium text-destructive">
+					Lista nie ma elementów
+				</Text>
+			</View>
+		);
+	}
+
+	if (isError) {
 		return (
 			<View className="flex-1 items-center justify-center gap-2 px-6">
 				<Text className="text-lg font-medium text-destructive">
 					Błąd ładowania listy
 				</Text>
+				<Pressable onPress={handleRefresh}>
+					<Text className="text-primary underline">Spróbuj ponownie</Text>
+				</Pressable>
 			</View>
 		);
 	}
@@ -75,8 +124,11 @@ function ListDetailContent(props: { id: string }) {
 
 			<ListItemsContent
 				listId={id}
+				items={items}
 				filter={filter}
 				categoryId={selectedCategoryId}
+				isRefetching={isRefetching}
+				onRefresh={handleRefresh}
 			/>
 		</>
 	);

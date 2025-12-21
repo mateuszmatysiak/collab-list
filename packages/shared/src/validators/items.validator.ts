@@ -13,5 +13,10 @@ export const updateItemSchema = z.object({
 	categoryId: z.string().uuid().nullable().optional(),
 });
 
+export const reorderItemsSchema = z.object({
+	itemIds: z.array(z.uuid()).min(1),
+});
+
 export type CreateItemRequest = z.infer<typeof createItemSchema>;
 export type UpdateItemRequest = z.infer<typeof updateItemSchema>;
+export type ReorderItemsRequest = z.infer<typeof reorderItemsSchema>;

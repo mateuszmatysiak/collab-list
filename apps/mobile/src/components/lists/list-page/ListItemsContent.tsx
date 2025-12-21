@@ -1,34 +1,14 @@
 import type { ListItem } from "@collab-list/shared/types";
 import { useCallback, useMemo } from "react";
-import {
-	ActivityIndicator,
-	FlatList,
-	Pressable,
-	RefreshControl,
-	View,
-} from "react-native";
-import { useItems } from "@/api/items.api";
+import { RefreshControl, View } from "react-native";
+import DragList, { type DragListRenderItemInfo } from "react-native-draglist";
+import { useReorderItems } from "@/api/items.api";
 import { Text } from "@/components/ui/Text";
 import { AddItemDialog } from "./AddItemDialog";
 import type { ItemFilter } from "./ItemFilters";
 import { ListItemCard } from "./ListItemCard";
 
 const ITEM_SEPARATOR_HEIGHT = 12;
-
-function SeparatorItem() {
-	return <View style={{ height: ITEM_SEPARATOR_HEIGHT }} />;
-}
-
-interface ListItemRenderProps {
-	item: ListItem;
-	listId: string;
-}
-
-function ListItemCardRender(props: ListItemRenderProps) {
-	const { item, listId } = props;
-
-	return <ListItemCard item={item} listId={listId} />;
-}
 
 function EmptyList() {
 	return (
@@ -45,24 +25,26 @@ function EmptyList() {
 
 interface ListItemsContentProps {
 	listId: string;
+	items: ListItem[];
 	filter?: ItemFilter;
 	categoryId?: string | null;
+	isRefetching: boolean;
+	onRefresh: () => void;
 }
 
 export function ListItemsContent(props: ListItemsContentProps) {
-	const { listId, filter = "all", categoryId = null } = props;
-
 	const {
-		data: items,
-		isLoading,
-		isError,
+		listId,
+		items,
+		filter = "all",
+		categoryId = null,
 		isRefetching,
-		refetch,
-	} = useItems(listId);
+		onRefresh,
+	} = props;
+
+	const { mutate: reorderItems } = useReorderItems(listId);
 
 	const filteredItems = useMemo(() => {
-		if (!items) return [];
-
 		let filtered = items;
 
 		switch (filter) {
@@ -86,50 +68,72 @@ export function ListItemsContent(props: ListItemsContentProps) {
 		return filtered;
 	}, [items, filter, categoryId]);
 
-	const handleRefresh = useCallback(() => {
-		refetch();
-	}, [refetch]);
+	const handleReordered = useCallback(
+		(fromIndex: number, toIndex: number) => {
+			const movedItem = filteredItems[fromIndex];
+			const targetItem = filteredItems[toIndex];
+			if (!movedItem || !targetItem) return;
 
-	if (isLoading) {
-		return (
-			<View className="flex-1 items-center justify-center">
-				<ActivityIndicator size="large" />
-			</View>
-		);
-	}
+			const fullFromIndex = items.findIndex((item) => item.id === movedItem.id);
+			const fullToIndex = items.findIndex((item) => item.id === targetItem.id);
+			if (fullFromIndex === -1 || fullToIndex === -1) return;
 
-	if (isError) {
+			const newOrder = [...items];
+			const [removed] = newOrder.splice(fullFromIndex, 1);
+			if (!removed) return;
+			newOrder.splice(fullToIndex, 0, removed);
+
+			const itemIds = newOrder.map((item) => item.id);
+			reorderItems({ itemIds });
+		},
+		[items, filteredItems, reorderItems],
+	);
+
+	const renderItem = useCallback(
+		(info: DragListRenderItemInfo<ListItem>) => {
+			const { item, onDragStart, onDragEnd, isActive } = info;
+
+			return (
+				<View style={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}>
+					<ListItemCard
+						item={item}
+						listId={listId}
+						isActive={isActive}
+						onDragStart={onDragStart}
+						onDragEnd={onDragEnd}
+					/>
+				</View>
+			);
+		},
+		[listId],
+	);
+
+	if (filteredItems.length === 0) {
 		return (
-			<View className="flex-1 items-center justify-center gap-2 px-6">
-				<Text className="text-lg font-medium text-destructive">
-					Błąd ładowania elementów
-				</Text>
-				<Pressable onPress={handleRefresh}>
-					<Text className="text-primary underline">Spróbuj ponownie</Text>
-				</Pressable>
+			<View className="flex-1 px-4">
+				<EmptyList />
+				<View className="py-4">
+					<AddItemDialog listId={listId} />
+				</View>
 			</View>
 		);
 	}
 
 	return (
-		<FlatList
+		<DragList
 			data={filteredItems}
 			keyExtractor={(item) => item.id}
-			renderItem={({ item }) => (
-				<ListItemCardRender item={item} listId={listId} />
-			)}
-			ListEmptyComponent={EmptyList}
-			ItemSeparatorComponent={SeparatorItem}
+			renderItem={renderItem}
+			onReordered={handleReordered}
+			contentContainerStyle={{ paddingHorizontal: 16 }}
+			showsVerticalScrollIndicator={false}
+			refreshControl={
+				<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
+			}
 			ListFooterComponent={
 				<View className="py-4">
 					<AddItemDialog listId={listId} />
 				</View>
-			}
-			contentContainerClassName="px-4"
-			showsVerticalScrollIndicator={false}
-			removeClippedSubviews={false}
-			refreshControl={
-				<RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />
 			}
 		/>
 	);
