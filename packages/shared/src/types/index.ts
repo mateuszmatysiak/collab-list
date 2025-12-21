@@ -17,6 +17,7 @@ export interface ListItem {
 	id: string;
 	listId: string;
 	title: string;
+	description: string | null;
 	isCompleted: boolean;
 	createdAt: Date;
 }
