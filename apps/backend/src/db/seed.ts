@@ -1,6 +1,14 @@
 import { hashPassword } from "../utils/password";
 import { db } from "./index";
-import { listItems, listShares, lists, refreshTokens, users } from "./schema";
+import {
+	categories,
+	categoryItems,
+	listItems,
+	listShares,
+	lists,
+	refreshTokens,
+	users,
+} from "./schema";
 
 async function seed() {
 	console.log("🌱 Rozpoczynam resetowanie i wypełnianie bazy danych...\n");
@@ -12,6 +20,8 @@ async function seed() {
 		await db.delete(listItems);
 		await db.delete(listShares);
 		await db.delete(lists);
+		await db.delete(categoryItems);
+		await db.delete(categories);
 		await db.delete(users);
 		console.log("   ✓ Baza danych wyczyszczona\n");
 
@@ -55,11 +65,196 @@ async function seed() {
 			})
 			.returning();
 
-		if (!jan || !anna || !piotr || !maria) {
+		const [tomasz] = await db
+			.insert(users)
+			.values({
+				name: "Tomasz Nowy",
+				email: "tomasz@example.com",
+				passwordHash,
+			})
+			.returning();
+
+		if (!jan || !anna || !piotr || !maria || !tomasz) {
 			throw new Error("Nie udało się utworzyć użytkowników");
 		}
 
-		console.log(`   ✓ Utworzono 4 użytkowników\n`);
+		console.log(`   ✓ Utworzono 5 użytkowników\n`);
+
+		// ========== KATEGORIE GLOBALNE ==========
+		console.log("📁 Tworzenie kategorii globalnych...");
+
+		// Nabiał
+		const [nabial] = await db
+			.insert(categories)
+			.values({ name: "Nabiał", icon: "Milk" })
+			.returning();
+
+		if (!nabial) throw new Error("Nie udało się utworzyć kategorii Nabiał");
+
+		await db.insert(categoryItems).values([
+			{ categoryId: nabial.id, name: "Mleko" },
+			{ categoryId: nabial.id, name: "Ser żółty" },
+			{ categoryId: nabial.id, name: "Ser biały" },
+			{ categoryId: nabial.id, name: "Jogurt" },
+			{ categoryId: nabial.id, name: "Śmietana" },
+			{ categoryId: nabial.id, name: "Masło" },
+			{ categoryId: nabial.id, name: "Jajka" },
+			{ categoryId: nabial.id, name: "Twaróg" },
+			{ categoryId: nabial.id, name: "Kefir" },
+			{ categoryId: nabial.id, name: "Maślanka" },
+		]);
+
+		// Mięso
+		const [mieso] = await db
+			.insert(categories)
+			.values({ name: "Mięso", icon: "Beef" })
+			.returning();
+
+		if (!mieso) throw new Error("Nie udało się utworzyć kategorii Mięso");
+
+		await db.insert(categoryItems).values([
+			{ categoryId: mieso.id, name: "Kurczak" },
+			{ categoryId: mieso.id, name: "Wołowina" },
+			{ categoryId: mieso.id, name: "Wieprzowina" },
+			{ categoryId: mieso.id, name: "Indyk" },
+			{ categoryId: mieso.id, name: "Szynka" },
+			{ categoryId: mieso.id, name: "Kiełbasa" },
+			{ categoryId: mieso.id, name: "Boczek" },
+			{ categoryId: mieso.id, name: "Schab" },
+			{ categoryId: mieso.id, name: "Filet z kurczaka" },
+		]);
+
+		// Owoce
+		const [owoce] = await db
+			.insert(categories)
+			.values({ name: "Owoce", icon: "Apple" })
+			.returning();
+
+		if (!owoce) throw new Error("Nie udało się utworzyć kategorii Owoce");
+
+		await db.insert(categoryItems).values([
+			{ categoryId: owoce.id, name: "Jabłka" },
+			{ categoryId: owoce.id, name: "Banany" },
+			{ categoryId: owoce.id, name: "Pomarańcze" },
+			{ categoryId: owoce.id, name: "Truskawki" },
+			{ categoryId: owoce.id, name: "Winogrona" },
+			{ categoryId: owoce.id, name: "Gruszki" },
+			{ categoryId: owoce.id, name: "Śliwki" },
+			{ categoryId: owoce.id, name: "Maliny" },
+			{ categoryId: owoce.id, name: "Borówki" },
+		]);
+
+		// Warzywa
+		const [warzywa] = await db
+			.insert(categories)
+			.values({ name: "Warzywa", icon: "Carrot" })
+			.returning();
+
+		if (!warzywa) throw new Error("Nie udało się utworzyć kategorii Warzywa");
+
+		await db.insert(categoryItems).values([
+			{ categoryId: warzywa.id, name: "Pomidory" },
+			{ categoryId: warzywa.id, name: "Ogórki" },
+			{ categoryId: warzywa.id, name: "Marchew" },
+			{ categoryId: warzywa.id, name: "Cebula" },
+			{ categoryId: warzywa.id, name: "Papryka" },
+			{ categoryId: warzywa.id, name: "Sałata" },
+			{ categoryId: warzywa.id, name: "Ziemniaki" },
+			{ categoryId: warzywa.id, name: "Brokuły" },
+			{ categoryId: warzywa.id, name: "Kalafior" },
+		]);
+
+		// Napoje
+		const [napoje] = await db
+			.insert(categories)
+			.values({ name: "Napoje", icon: "Coffee" })
+			.returning();
+
+		if (!napoje) throw new Error("Nie udało się utworzyć kategorii Napoje");
+
+		await db.insert(categoryItems).values([
+			{ categoryId: napoje.id, name: "Woda" },
+			{ categoryId: napoje.id, name: "Sok pomarańczowy" },
+			{ categoryId: napoje.id, name: "Sok jabłkowy" },
+			{ categoryId: napoje.id, name: "Kawa" },
+			{ categoryId: napoje.id, name: "Herbata" },
+			{ categoryId: napoje.id, name: "Cola" },
+			{ categoryId: napoje.id, name: "Piwo" },
+			{ categoryId: napoje.id, name: "Wino" },
+			{ categoryId: napoje.id, name: "Napoje gazowane" },
+		]);
+
+		// Pieczywo
+		const [pieczywo] = await db
+			.insert(categories)
+			.values({ name: "Pieczywo", icon: "Wheat" })
+			.returning();
+
+		if (!pieczywo) throw new Error("Nie udało się utworzyć kategorii Pieczywo");
+
+		await db.insert(categoryItems).values([
+			{ categoryId: pieczywo.id, name: "Chleb" },
+			{ categoryId: pieczywo.id, name: "Bułki" },
+			{ categoryId: pieczywo.id, name: "Bagietka" },
+			{ categoryId: pieczywo.id, name: "Rogaliki" },
+			{ categoryId: pieczywo.id, name: "Bułka tarta" },
+			{ categoryId: pieczywo.id, name: "Tosty" },
+		]);
+
+		// Chemia
+		const [chemia] = await db
+			.insert(categories)
+			.values({ name: "Chemia", icon: "Spray" })
+			.returning();
+
+		if (!chemia) throw new Error("Nie udało się utworzyć kategorii Chemia");
+
+		await db.insert(categoryItems).values([
+			{ categoryId: chemia.id, name: "Proszek do prania" },
+			{ categoryId: chemia.id, name: "Płyn do naczyń" },
+			{ categoryId: chemia.id, name: "Mydło" },
+			{ categoryId: chemia.id, name: "Szampon" },
+			{ categoryId: chemia.id, name: "Pasta do zębów" },
+			{ categoryId: chemia.id, name: "Papier toaletowy" },
+		]);
+
+		// Słodycze
+		const [slodycze] = await db
+			.insert(categories)
+			.values({ name: "Słodycze", icon: "Candy" })
+			.returning();
+
+		if (!slodycze) throw new Error("Nie udało się utworzyć kategorii Słodycze");
+
+		await db.insert(categoryItems).values([
+			{ categoryId: slodycze.id, name: "Czekolada" },
+			{ categoryId: slodycze.id, name: "Ciastka" },
+			{ categoryId: slodycze.id, name: "Cukierki" },
+			{ categoryId: slodycze.id, name: "Lody" },
+			{ categoryId: slodycze.id, name: "Batony" },
+			{ categoryId: slodycze.id, name: "Wafle" },
+		]);
+
+		// Produkty sypkie
+		const [sypkie] = await db
+			.insert(categories)
+			.values({ name: "Produkty sypkie", icon: "Package" })
+			.returning();
+
+		if (!sypkie)
+			throw new Error("Nie udało się utworzyć kategorii Produkty sypkie");
+
+		await db.insert(categoryItems).values([
+			{ categoryId: sypkie.id, name: "Mąka" },
+			{ categoryId: sypkie.id, name: "Cukier" },
+			{ categoryId: sypkie.id, name: "Ryż" },
+			{ categoryId: sypkie.id, name: "Makaron" },
+			{ categoryId: sypkie.id, name: "Kasza" },
+			{ categoryId: sypkie.id, name: "Płatki owsiane" },
+			{ categoryId: sypkie.id, name: "Kasza gryczana" },
+		]);
+
+		console.log(`   ✓ 9 kategorii globalnych, 71 elementów\n`);
 
 		// ========== LISTY JANA ==========
 		console.log("📋 Tworzenie list dla Jana...");
@@ -85,10 +280,30 @@ async function seed() {
 
 		// Elementy list Jana
 		await db.insert(listItems).values([
-			{ listId: janZakupy.id, title: "Chleb", isCompleted: true },
-			{ listId: janZakupy.id, title: "Mleko", isCompleted: false },
-			{ listId: janZakupy.id, title: "Jajka", isCompleted: false },
-			{ listId: janZakupy.id, title: "Ser żółty", isCompleted: true },
+			{
+				listId: janZakupy.id,
+				title: "Chleb",
+				isCompleted: true,
+				categoryId: pieczywo.id,
+			},
+			{
+				listId: janZakupy.id,
+				title: "Mleko",
+				isCompleted: false,
+				categoryId: nabial.id,
+			},
+			{
+				listId: janZakupy.id,
+				title: "Jajka",
+				isCompleted: false,
+				categoryId: nabial.id,
+			},
+			{
+				listId: janZakupy.id,
+				title: "Ser żółty",
+				isCompleted: true,
+				categoryId: nabial.id,
+			},
 			{ listId: janZadania.id, title: "Posprzątać pokój", isCompleted: false },
 			{ listId: janZadania.id, title: "Wynieść śmieci", isCompleted: true },
 			{ listId: janZadania.id, title: "Umyć naczynia", isCompleted: false },
@@ -248,15 +463,18 @@ async function seed() {
 		// Podsumowanie
 		console.log("✨ Baza danych została zresetowana i wypełniona!\n");
 		console.log("📊 Podsumowanie:");
-		console.log("   - 4 użytkowników");
+		console.log("   - 5 użytkowników");
 		console.log("   - 10 list");
 		console.log("   - 34 elementy list");
-		console.log("   - 14 udostępnień\n");
+		console.log("   - 14 udostępnień");
+		console.log("   - 9 kategorii globalnych");
+		console.log("   - 71 elementów kategorii\n");
 		console.log("📝 Konta użytkowników (hasło: haslo123):");
 		console.log("   - jan@example.com");
 		console.log("   - anna@example.com");
 		console.log("   - piotr@example.com");
-		console.log("   - maria@example.com\n");
+		console.log("   - maria@example.com");
+		console.log("   - tomasz@example.com (pusta baza danych)\n");
 		process.exit(0);
 	} catch (error) {
 		console.error("❌ Błąd podczas wypełniania bazy danych:", error);
