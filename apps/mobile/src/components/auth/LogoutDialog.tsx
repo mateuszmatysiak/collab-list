@@ -15,7 +15,13 @@ import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
 import { useAuth } from "@/contexts/auth.context";
 
-export function LogoutDialog() {
+interface LogoutDialogProps {
+	variant?: "icon" | "button";
+}
+
+export function LogoutDialog(props: LogoutDialogProps) {
+	const { variant = "icon" } = props;
+
 	const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -35,12 +41,23 @@ export function LogoutDialog() {
 
 	return (
 		<>
-			<Pressable
-				onPress={() => setIsLogoutOpen(true)}
-				className="size-10 items-center justify-center rounded-full bg-muted active:bg-muted/80"
-			>
-				<Icon as={LogOut} className="text-foreground" size={20} />
-			</Pressable>
+			{variant === "icon" ? (
+				<Pressable
+					onPress={() => setIsLogoutOpen(true)}
+					className="size-10 items-center justify-center rounded-full bg-muted active:bg-muted/80"
+				>
+					<Icon as={LogOut} className="text-foreground" size={20} />
+				</Pressable>
+			) : (
+				<Button
+					variant="default"
+					onPress={() => setIsLogoutOpen(true)}
+					className="w-full"
+				>
+					<Icon as={LogOut} className="text-white" size={20} />
+					<Text>Wyloguj</Text>
+				</Button>
+			)}
 
 			<Dialog open={isLogoutOpen} onOpenChange={setIsLogoutOpen}>
 				<DialogContent>
