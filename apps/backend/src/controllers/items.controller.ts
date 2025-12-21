@@ -4,8 +4,25 @@ import {
 } from "@collab-list/shared/validators";
 import type { Context } from "hono";
 import { authMiddleware } from "../middleware/auth";
-import { createItem, deleteItem, updateItem } from "../services/items.service";
+import {
+	createItem,
+	deleteItem,
+	getItems,
+	updateItem,
+} from "../services/items.service";
 import { createJsonValidator, getValidatedJson } from "../utils/validator";
+
+export const getItemsController = [
+	authMiddleware,
+	async (c: Context) => {
+		const userId = c.get("userId");
+		const listId = c.req.param("listId");
+
+		const items = await getItems(listId, userId);
+
+		return c.json({ items });
+	},
+];
 
 export const createItemController = [
 	authMiddleware,
@@ -13,9 +30,9 @@ export const createItemController = [
 	async (c: Context) => {
 		const userId = c.get("userId");
 		const listId = c.req.param("listId");
-		const { title } = getValidatedJson(c, createItemSchema);
+		const { title, description } = getValidatedJson(c, createItemSchema);
 
-		const item = await createItem(listId, userId, title);
+		const item = await createItem(listId, userId, title, description);
 
 		return c.json({ item }, 201);
 	},

@@ -35,10 +35,27 @@ async function checkListAccess(
 	return null;
 }
 
+export async function getItems(listId: string, userId: string) {
+	const access = await checkListAccess(listId, userId);
+
+	if (!access) {
+		throw new NotFoundError("Nie znaleziono listy");
+	}
+
+	const items = await db
+		.select()
+		.from(listItems)
+		.where(eq(listItems.listId, listId))
+		.orderBy(listItems.createdAt);
+
+	return items;
+}
+
 export async function createItem(
 	listId: string,
 	userId: string,
 	title: string,
+	description?: string,
 ) {
 	const access = await checkListAccess(listId, userId);
 
@@ -57,6 +74,7 @@ export async function createItem(
 		.values({
 			listId,
 			title,
+			description,
 			isCompleted: false,
 		})
 		.returning();
@@ -68,7 +86,7 @@ export async function updateItem(
 	itemId: string,
 	listId: string,
 	userId: string,
-	data: { title?: string; is_completed?: boolean },
+	data: { title?: string; description?: string; is_completed?: boolean },
 ) {
 	const access = await checkListAccess(listId, userId);
 
@@ -96,10 +114,18 @@ export async function updateItem(
 		throw new NotFoundError("Element nie należy do tej listy");
 	}
 
-	const updateData: { title?: string; isCompleted?: boolean } = {};
+	const updateData: {
+		title?: string;
+		description?: string;
+		isCompleted?: boolean;
+	} = {};
 
 	if (data.title !== undefined) {
 		updateData.title = data.title;
+	}
+
+	if (data.description !== undefined) {
+		updateData.description = data.description;
 	}
 
 	if (data.is_completed !== undefined) {

@@ -1,0 +1,1 @@
+ALTER TABLE "list_items" ADD COLUMN "description" varchar(2000);

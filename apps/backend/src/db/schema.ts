@@ -44,6 +44,7 @@ export const listItems = pgTable(
 			.notNull()
 			.references(() => lists.id, { onDelete: "cascade" }),
 		title: varchar("title", { length: 1000 }).notNull(),
+		description: varchar("description", { length: 2000 }),
 		isCompleted: boolean("is_completed").default(false).notNull(),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 	},
