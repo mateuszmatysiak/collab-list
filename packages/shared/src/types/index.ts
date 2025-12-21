@@ -19,6 +19,8 @@ export interface ListItem {
 	title: string;
 	description: string | null;
 	isCompleted: boolean;
+	categoryId: string | null;
+	categoryIcon: string | null;
 	createdAt: Date;
 }
 
@@ -51,7 +53,6 @@ export interface AuthTokens {
 	refreshToken: string;
 }
 
-// API response types (extended with computed fields)
 export interface ListShareUser {
 	userId: string;
 	userName: string;
@@ -87,4 +88,28 @@ export interface SharesAuthor {
 export interface SharesResponse {
 	shares: ShareWithUser[];
 	author: SharesAuthor;
+}
+
+export interface Category {
+	id: string;
+	name: string;
+	icon: string;
+	createdAt: Date;
+}
+
+export interface CategoryItem {
+	id: string;
+	categoryId: string;
+	name: string;
+	createdAt: Date;
+}
+
+export interface CategoryWithItems extends Category {
+	items: CategoryItem[];
+	itemsCount: number;
+}
+
+export interface CategoryItemWithCategory extends CategoryItem {
+	categoryName: string;
+	categoryIcon: string;
 }
