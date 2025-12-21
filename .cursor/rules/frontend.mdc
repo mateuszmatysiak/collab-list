@@ -3,9 +3,9 @@ description: Frontend Rules
 globs: *.tsx,*.ts
 alwaysApply: false
 ---
-## Frontend
+# Frontend
 
-### Code Style and Structure
+## Code Style and Structure
 
 - Write concise, technical TypeScript code with accurate examples.
 - Use functional and declarative programming patterns; avoid classes.
@@ -14,27 +14,27 @@ alwaysApply: false
 - Structure files: exported component, subcomponents, helpers, static content, types.
 - Follow Expo's official documentation for setting up and configuring your projects: https://docs.expo.dev/
 
-### Naming Conventions
+## Naming Conventions
 
 - Use lowercase with dashes for directories (e.g., components/auth-wizard).
 - Use uppercase for components (e.g., components/Button.tsx)
 - Favor named exports for components.
 
-### TypeScript Usage
+## TypeScript Usage
 
 - Use TypeScript for all code; prefer interfaces over types.
 - Avoid enums; use maps instead.
 - Use functional components with TypeScript interfaces.
 - Use strict mode in TypeScript for better type safety.
 
-### Syntax and Formatting
+## Syntax and Formatting
 
 - Use the "function" keyword for pure functions.
 - Use declarative JSX.
 - Use BiomeJS for consistent code formatting.
 - For component props: use `function ComponentName(props: ComponentProps)` syntax, then destructure with `const { specificProps, ...restProps } = props` pattern.
 
-### UI and Styling
+## UI and Styling
 
 - Use Expo's built-in components for common UI patterns and layouts.
 - Use [React Native Reusables](https://reactnativereusables.com/docs) with [Nativewind](https://www.nativewind.dev/) for component styling.

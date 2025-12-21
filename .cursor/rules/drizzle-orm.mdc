@@ -3,7 +3,7 @@ description: Drizzle ORM (Postgres) Rules
 globs: *tsx,*.ts
 alwaysApply: false
 ---
-## Drizzle ORM
+# Drizzle ORM
 
 - Use pgTable from drizzle-orm/pg-core to define tables.
 - Organize schema files as needed and export all models.
