@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Folder, TextAlignStart, UserRound } from "lucide-react-native";
+import { FolderOpen, ListTodo, UserIcon } from "lucide-react-native";
 
 export default function TabLayout() {
 	return (
@@ -16,7 +16,7 @@ export default function TabLayout() {
 				options={{
 					title: "Listy",
 					tabBarIcon: ({ color, size }) => (
-						<TextAlignStart color={color} size={size} />
+						<ListTodo color={color} size={size} />
 					),
 				}}
 			/>
@@ -24,7 +24,9 @@ export default function TabLayout() {
 				name="categories"
 				options={{
 					title: "Kategorie",
-					tabBarIcon: ({ color, size }) => <Folder color={color} size={size} />,
+					tabBarIcon: ({ color, size }) => (
+						<FolderOpen color={color} size={size} />
+					),
 				}}
 			/>
 			<Tabs.Screen
@@ -32,7 +34,7 @@ export default function TabLayout() {
 				options={{
 					title: "Profil",
 					tabBarIcon: ({ color, size }) => (
-						<UserRound color={color} size={size} />
+						<UserIcon color={color} size={size} />
 					),
 				}}
 			/>
