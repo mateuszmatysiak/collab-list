@@ -63,6 +63,11 @@ export function CreateListDialog() {
 		setIsCreateOpen(false);
 	}
 
+	function handleChangeName(text: string) {
+		setName(text);
+		if (nameError) setNameError("");
+	}
+
 	return (
 		<>
 			<Button
@@ -83,10 +88,7 @@ export function CreateListDialog() {
 					<Input
 						placeholder="Nazwa listy"
 						value={name}
-						onChangeText={(text) => {
-							setName(text);
-							if (nameError) setNameError("");
-						}}
+						onChangeText={handleChangeName}
 						editable={!isPending}
 						autoFocus
 						maxLength={MAX_NAME_LENGTH}

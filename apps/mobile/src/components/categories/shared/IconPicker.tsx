@@ -74,3 +74,4 @@ export function IconPicker(props: IconPickerProps) {
 		</View>
 	);
 }
+

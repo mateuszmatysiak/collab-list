@@ -15,7 +15,7 @@ import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Text } from "@/components/ui/Text";
-import { IconPicker, POPULAR_ICONS } from "./IconPicker";
+import { IconPicker, POPULAR_ICONS } from "../shared/IconPicker";
 
 const MIN_NAME_LENGTH = 1;
 const MAX_NAME_LENGTH = 255;
@@ -68,6 +68,11 @@ export function CreateCategoryDialog() {
 		setIsOpen(false);
 	}
 
+	function handleChangeName(text: string) {
+		setName(text);
+		if (nameError) setNameError("");
+	}
+
 	return (
 		<>
 			<Button onPress={() => setIsOpen(true)} size="lg" className="w-full">
@@ -91,10 +96,7 @@ export function CreateCategoryDialog() {
 								<Input
 									placeholder="np. Artykuły biurowe"
 									value={name}
-									onChangeText={(text) => {
-										setName(text);
-										if (nameError) setNameError("");
-									}}
+									onChangeText={handleChangeName}
 									editable={!isPending}
 									maxLength={MAX_NAME_LENGTH}
 								/>

@@ -1,5 +1,5 @@
 import type { CategoryItem } from "@collab-list/shared/types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert } from "react-native";
 import { useUpdateCategoryItem } from "@/api/categories.api";
 import { Button } from "@/components/ui/Button";
@@ -32,12 +32,13 @@ export function EditPredefinedItemDialog(props: EditPredefinedItemDialogProps) {
 
 	const { mutate: updateItem, isPending } = useUpdateCategoryItem(categoryId);
 
-	useEffect(() => {
-		if (isOpen) {
+	function handleOpenChange(open: boolean) {
+		if (open) {
 			setName(item.name);
 			setNameError("");
 		}
-	}, [isOpen, item.name]);
+		onOpenChange(open);
+	}
 
 	function handleSave() {
 		const trimmedName = name.trim();
@@ -76,8 +77,13 @@ export function EditPredefinedItemDialog(props: EditPredefinedItemDialogProps) {
 		onOpenChange(false);
 	}
 
+	function handleChangeName(text: string) {
+		setName(text);
+		if (nameError) setNameError("");
+	}
+
 	return (
-		<Dialog open={isOpen} onOpenChange={onOpenChange}>
+		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Edytuj element</DialogTitle>
@@ -86,10 +92,7 @@ export function EditPredefinedItemDialog(props: EditPredefinedItemDialogProps) {
 				<Input
 					placeholder="Nazwa elementu"
 					value={name}
-					onChangeText={(text) => {
-						setName(text);
-						if (nameError) setNameError("");
-					}}
+					onChangeText={handleChangeName}
 					editable={!isPending}
 					autoFocus
 					maxLength={MAX_NAME_LENGTH}
@@ -112,3 +115,4 @@ export function EditPredefinedItemDialog(props: EditPredefinedItemDialogProps) {
 		</Dialog>
 	);
 }
+

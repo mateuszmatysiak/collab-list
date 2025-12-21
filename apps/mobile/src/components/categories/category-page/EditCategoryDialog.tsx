@@ -1,5 +1,5 @@
 import type { Category } from "@collab-list/shared/types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert, ScrollView, View } from "react-native";
 import { useUpdateCategory } from "@/api/categories.api";
 import { Button } from "@/components/ui/Button";
@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Text } from "@/components/ui/Text";
-import { IconPicker } from "./IconPicker";
+import { IconPicker } from "../shared/IconPicker";
 
 const MIN_NAME_LENGTH = 1;
 const MAX_NAME_LENGTH = 255;
@@ -34,13 +34,14 @@ export function EditCategoryDialog(props: EditCategoryDialogProps) {
 
 	const { mutate: updateCategory, isPending } = useUpdateCategory(category.id);
 
-	useEffect(() => {
-		if (isOpen) {
+	function handleOpenChange(open: boolean) {
+		if (open) {
 			setName(category.name);
 			setIcon(category.icon);
 			setNameError("");
 		}
-	}, [isOpen, category.name, category.icon]);
+		onOpenChange(open);
+	}
 
 	function handleSave() {
 		const trimmedName = name.trim();
@@ -80,10 +81,15 @@ export function EditCategoryDialog(props: EditCategoryDialogProps) {
 		onOpenChange(false);
 	}
 
+	function handleChangeName(text: string) {
+		setName(text);
+		if (nameError) setNameError("");
+	}
+
 	const hasChanges = name.trim() !== category.name || icon !== category.icon;
 
 	return (
-		<Dialog open={isOpen} onOpenChange={onOpenChange}>
+		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<DialogContent className="max-h-[80%]">
 				<DialogHeader>
 					<DialogTitle>Edytuj kategorię</DialogTitle>
@@ -99,10 +105,7 @@ export function EditCategoryDialog(props: EditCategoryDialogProps) {
 							<Input
 								placeholder="np. Artykuły biurowe"
 								value={name}
-								onChangeText={(text) => {
-									setName(text);
-									if (nameError) setNameError("");
-								}}
+								onChangeText={handleChangeName}
 								editable={!isPending}
 								maxLength={MAX_NAME_LENGTH}
 							/>
@@ -133,3 +136,4 @@ export function EditCategoryDialog(props: EditCategoryDialogProps) {
 		</Dialog>
 	);
 }
+

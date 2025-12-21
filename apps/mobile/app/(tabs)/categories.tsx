@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { CategoryGrid } from "@/components/categories/CategoryGrid";
-import { CategorySearchInput } from "@/components/categories/CategorySearchInput";
-import { CreateCategoryDialog } from "@/components/categories/CreateCategoryDialog";
+import { CategoryGrid } from "@/components/categories/categories-page/CategoryGrid";
+import { CategorySearchInput } from "@/components/categories/categories-page/CategorySearchInput";
+import { CreateCategoryDialog } from "@/components/categories/categories-page/CreateCategoryDialog";
 import { Text } from "@/components/ui/Text";
 
 export default function CategoriesScreen() {

@@ -85,6 +85,11 @@ export function ManageUsersDialog(props: ManageUsersDialogProps) {
 		onOpenChange(false);
 	}
 
+	function handleChangeEmail(text: string) {
+		setEmail(text);
+		if (emailError) setEmailError("");
+	}
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
@@ -117,10 +122,7 @@ export function ManageUsersDialog(props: ManageUsersDialogProps) {
 								className="flex-1"
 								placeholder="Email użytkownika"
 								value={email}
-								onChangeText={(text) => {
-									setEmail(text);
-									if (emailError) setEmailError("");
-								}}
+								onChangeText={handleChangeEmail}
 								editable={!isSharing}
 								keyboardType="email-address"
 								autoCapitalize="none"

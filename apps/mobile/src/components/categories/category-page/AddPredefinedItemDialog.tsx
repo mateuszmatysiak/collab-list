@@ -69,6 +69,11 @@ export function AddPredefinedItemDialog(props: AddPredefinedItemDialogProps) {
 		setIsOpen(false);
 	}
 
+	function handleChangeName(text: string) {
+		setName(text);
+		if (nameError) setNameError("");
+	}
+
 	return (
 		<>
 			<Button onPress={() => setIsOpen(true)} size="lg" className="w-full">
@@ -87,10 +92,7 @@ export function AddPredefinedItemDialog(props: AddPredefinedItemDialogProps) {
 					<Input
 						placeholder="Nazwa elementu"
 						value={name}
-						onChangeText={(text) => {
-							setName(text);
-							if (nameError) setNameError("");
-						}}
+						onChangeText={handleChangeName}
 						editable={!isPending}
 						autoFocus
 						maxLength={MAX_NAME_LENGTH}
