@@ -3,8 +3,8 @@ import type { AuthTokens, JWTPayload } from "@collab-list/shared/types";
 import jwt from "jsonwebtoken";
 import { getEnv } from "../config/env";
 
-const ACCESS_TOKEN_EXPIRES_IN = "15m"; // 15 minutes
-const REFRESH_TOKEN_EXPIRES_IN_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const ACCESS_TOKEN_EXPIRES_IN = "15m";
+const REFRESH_TOKEN_EXPIRES_IN_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function generateAccessToken(userId: string): string {
 	const payload: JWTPayload = { userId };

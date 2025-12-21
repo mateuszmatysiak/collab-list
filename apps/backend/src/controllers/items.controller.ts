@@ -30,9 +30,18 @@ export const createItemController = [
 	async (c: Context) => {
 		const userId = c.get("userId");
 		const listId = c.req.param("listId");
-		const { title, description } = getValidatedJson(c, createItemSchema);
+		const { title, description, categoryId } = getValidatedJson(
+			c,
+			createItemSchema,
+		);
 
-		const item = await createItem(listId, userId, title, description);
+		const item = await createItem(
+			listId,
+			userId,
+			title,
+			description,
+			categoryId,
+		);
 
 		return c.json({ item }, 201);
 	},

@@ -74,7 +74,6 @@ export async function shareList(
 		);
 	}
 
-	// Create share
 	const [share] = await db
 		.insert(listShares)
 		.values({

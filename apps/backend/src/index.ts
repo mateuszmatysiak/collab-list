@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getEnv } from "./config/env";
 import authRoutes from "./routes/auth.routes";
+import categoriesRoutes from "./routes/categories.routes";
 import itemsRoutes from "./routes/items.routes";
 import listsRoutes from "./routes/lists.routes";
 import sharesRoutes from "./routes/shares.routes";
@@ -28,7 +29,7 @@ app.use(
 				return origin;
 			}
 
-			return origin;
+			return null;
 		},
 		credentials: true,
 		allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
@@ -71,6 +72,7 @@ app.get("/health", (c) => {
 });
 
 app.route("/api/auth", authRoutes);
+app.route("/api/categories", categoriesRoutes);
 app.route("/api/lists", listsRoutes);
 app.route("/api/lists", itemsRoutes);
 app.route("/api/lists", sharesRoutes);
@@ -93,6 +95,5 @@ serve(
 	() => {
 		console.log(`Server is running on http://0.0.0.0:${Number(port)}`);
 		console.log(`Local: http://localhost:${Number(port)}`);
-		console.log(`Network: http://192.168.1.23:${Number(port)}`);
 	},
 );

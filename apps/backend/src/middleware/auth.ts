@@ -29,9 +29,7 @@ export async function optionalAuthMiddleware(c: Context, next: Next) {
 		try {
 			const payload = verifyAccessToken(token);
 			c.set("userId", payload.userId);
-		} catch {
-			// Ignorujemy błędy dla opcjonalnej autoryzacji
-		}
+		} catch {}
 	}
 
 	await next();
