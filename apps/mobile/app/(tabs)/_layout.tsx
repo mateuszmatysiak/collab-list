@@ -12,7 +12,7 @@ export default function TabLayout() {
 			}}
 		>
 			<Tabs.Screen
-				name="index"
+				name="lists"
 				options={{
 					title: "Listy",
 					tabBarIcon: ({ color, size }) => (
@@ -36,18 +36,6 @@ export default function TabLayout() {
 					tabBarIcon: ({ color, size }) => (
 						<UserIcon color={color} size={size} />
 					),
-				}}
-			/>
-			<Tabs.Screen
-				name="lists/[id]"
-				options={{
-					href: null,
-				}}
-			/>
-			<Tabs.Screen
-				name="categories/[id]"
-				options={{
-					href: null,
 				}}
 			/>
 		</Tabs>

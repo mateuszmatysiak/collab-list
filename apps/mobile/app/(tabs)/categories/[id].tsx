@@ -66,7 +66,7 @@ export default function CategoryDetailScreen() {
 		<SafeAreaView className="flex-1 bg-background" edges={["top"]}>
 			<View className="flex-row items-center gap-3 px-4 py-3">
 				<Pressable
-					onPress={() => router.push("/(tabs)/categories")}
+					onPress={() => router.back()}
 					className="size-10 items-center justify-center rounded-full active:bg-accent"
 					hitSlop={8}
 				>
