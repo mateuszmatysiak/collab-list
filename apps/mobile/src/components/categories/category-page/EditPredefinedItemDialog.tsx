@@ -115,4 +115,3 @@ export function EditPredefinedItemDialog(props: EditPredefinedItemDialogProps) {
 		</Dialog>
 	);
 }
-

@@ -136,4 +136,3 @@ export function EditCategoryDialog(props: EditCategoryDialogProps) {
 		</Dialog>
 	);
 }
-
