@@ -63,7 +63,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				await logoutMutation.mutateAsync({ refreshToken });
 			}
 		} catch (_error) {
-			// Ignore logout errors
 		} finally {
 			await clearTokens();
 			queryClient.clear();

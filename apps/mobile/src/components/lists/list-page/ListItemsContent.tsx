@@ -5,7 +5,6 @@ import {
 	FlatList,
 	Pressable,
 	RefreshControl,
-	StyleSheet,
 	View,
 } from "react-native";
 import { useItems } from "@/api/items.api";
@@ -13,12 +12,6 @@ import { Text } from "@/components/ui/Text";
 import { AddItemDialog } from "./AddItemDialog";
 import type { ItemFilter } from "./ItemFilters";
 import { ListItemCard } from "./ListItemCard";
-
-const styles = StyleSheet.create({
-	listContent: {
-		paddingHorizontal: 16,
-	},
-});
 
 const ITEM_SEPARATOR_HEIGHT = 12;
 
@@ -53,10 +46,11 @@ function EmptyList() {
 interface ListItemsContentProps {
 	listId: string;
 	filter?: ItemFilter;
+	categoryId?: string | null;
 }
 
 export function ListItemsContent(props: ListItemsContentProps) {
-	const { listId, filter = "all" } = props;
+	const { listId, filter = "all", categoryId = null } = props;
 
 	const {
 		data: items,
@@ -69,17 +63,28 @@ export function ListItemsContent(props: ListItemsContentProps) {
 	const filteredItems = useMemo(() => {
 		if (!items) return [];
 
+		let filtered = items;
+
 		switch (filter) {
 			case "all":
-				return items;
+				filtered = items;
+				break;
 			case "completed":
-				return items.filter((item) => item.isCompleted);
+				filtered = items.filter((item) => item.isCompleted);
+				break;
 			case "incomplete":
-				return items.filter((item) => !item.isCompleted);
+				filtered = items.filter((item) => !item.isCompleted);
+				break;
 			default:
-				return items;
+				filtered = items;
 		}
-	}, [items, filter]);
+
+		if (categoryId !== null && categoryId !== undefined) {
+			filtered = filtered.filter((item) => item.categoryId === categoryId);
+		}
+
+		return filtered;
+	}, [items, filter, categoryId]);
 
 	const handleRefresh = useCallback(() => {
 		refetch();
@@ -120,7 +125,7 @@ export function ListItemsContent(props: ListItemsContentProps) {
 					<AddItemDialog listId={listId} />
 				</View>
 			}
-			contentContainerStyle={styles.listContent}
+			contentContainerClassName="px-4"
 			showsVerticalScrollIndicator={false}
 			removeClippedSubviews={false}
 			refreshControl={

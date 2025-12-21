@@ -1,4 +1,5 @@
 import type { ListItem } from "@collab-list/shared/types";
+import * as LucideIcons from "lucide-react-native";
 import { X } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, View } from "react-native";
@@ -9,6 +10,17 @@ import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { Text } from "@/components/ui/Text";
 import { cn } from "@/lib/utils";
+
+function getCategoryIcon(
+	iconName: string | null,
+): LucideIcons.LucideIcon | null {
+	if (!iconName) return null;
+	const icons = LucideIcons as unknown as Record<
+		string,
+		LucideIcons.LucideIcon
+	>;
+	return icons[iconName] || null;
+}
 
 interface ListItemCardProps {
 	item: ListItem;
@@ -83,6 +95,10 @@ export function ListItemCard(props: ListItemCardProps) {
 		setIsEditingDescription(false);
 	}
 
+	const CategoryIconComponent = item.categoryIcon
+		? getCategoryIcon(item.categoryIcon)
+		: null;
+
 	return (
 		<Card
 			className={cn(
@@ -94,6 +110,12 @@ export function ListItemCard(props: ListItemCardProps) {
 				checked={item.isCompleted}
 				onCheckedChange={handleCheckboxChange}
 			/>
+
+			{CategoryIconComponent && (
+				<View className="size-8 items-center justify-center rounded-full bg-primary/10">
+					<Icon as={CategoryIconComponent} className="text-primary" size={16} />
+				</View>
+			)}
 
 			<View className="flex-1 gap-1">
 				{isEditingTitle ? (
