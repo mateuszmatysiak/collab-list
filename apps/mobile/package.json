@@ -13,6 +13,7 @@
 		"@collab-list/shared": "workspace:*",
 		"@hookform/resolvers": "5.2.2",
 		"@rn-primitives/avatar": "1.2.0",
+		"@rn-primitives/checkbox": "1.2.0",
 		"@rn-primitives/dialog": "1.2.0",
 		"@rn-primitives/label": "1.2.0",
 		"@rn-primitives/portal": "1.3.0",
