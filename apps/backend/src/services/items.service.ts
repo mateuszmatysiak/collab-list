@@ -1,7 +1,7 @@
 import type { ListRole } from "@collab-list/shared/types";
 import { and, eq } from "drizzle-orm";
 import { db } from "../db/index";
-import { listItems, listShares, lists } from "../db/schema";
+import { categories, listItems, listShares, lists } from "../db/schema";
 import { ForbiddenError, NotFoundError } from "../utils/errors";
 
 async function checkListAccess(
@@ -43,12 +43,31 @@ export async function getItems(listId: string, userId: string) {
 	}
 
 	const items = await db
-		.select()
+		.select({
+			id: listItems.id,
+			listId: listItems.listId,
+			title: listItems.title,
+			description: listItems.description,
+			isCompleted: listItems.isCompleted,
+			categoryId: listItems.categoryId,
+			categoryIcon: categories.icon,
+			createdAt: listItems.createdAt,
+		})
 		.from(listItems)
+		.leftJoin(categories, eq(listItems.categoryId, categories.id))
 		.where(eq(listItems.listId, listId))
 		.orderBy(listItems.createdAt);
 
-	return items;
+	return items.map((item) => ({
+		id: item.id,
+		listId: item.listId,
+		title: item.title,
+		description: item.description,
+		isCompleted: item.isCompleted,
+		categoryId: item.categoryId,
+		categoryIcon: item.categoryIcon ?? null,
+		createdAt: item.createdAt,
+	}));
 }
 
 export async function createItem(
@@ -56,6 +75,7 @@ export async function createItem(
 	userId: string,
 	title: string,
 	description?: string,
+	categoryId?: string | null,
 ) {
 	const access = await checkListAccess(listId, userId);
 
@@ -76,17 +96,56 @@ export async function createItem(
 			title,
 			description,
 			isCompleted: false,
+			categoryId: categoryId || null,
 		})
 		.returning();
 
-	return item;
+	if (!item) {
+		throw new Error("Nie udało się utworzyć elementu listy");
+	}
+
+	const [itemWithCategory] = await db
+		.select({
+			id: listItems.id,
+			listId: listItems.listId,
+			title: listItems.title,
+			description: listItems.description,
+			isCompleted: listItems.isCompleted,
+			categoryId: listItems.categoryId,
+			categoryIcon: categories.icon,
+			createdAt: listItems.createdAt,
+		})
+		.from(listItems)
+		.leftJoin(categories, eq(listItems.categoryId, categories.id))
+		.where(eq(listItems.id, item.id))
+		.limit(1);
+
+	if (!itemWithCategory) {
+		throw new NotFoundError("Nie znaleziono utworzonego elementu");
+	}
+
+	return {
+		id: itemWithCategory.id,
+		listId: itemWithCategory.listId,
+		title: itemWithCategory.title,
+		description: itemWithCategory.description,
+		isCompleted: itemWithCategory.isCompleted,
+		categoryId: itemWithCategory.categoryId,
+		categoryIcon: itemWithCategory.categoryIcon ?? null,
+		createdAt: itemWithCategory.createdAt,
+	};
 }
 
 export async function updateItem(
 	itemId: string,
 	listId: string,
 	userId: string,
-	data: { title?: string; description?: string; is_completed?: boolean },
+	data: {
+		title?: string;
+		description?: string;
+		is_completed?: boolean;
+		categoryId?: string | null;
+	},
 ) {
 	const access = await checkListAccess(listId, userId);
 
@@ -118,6 +177,7 @@ export async function updateItem(
 		title?: string;
 		description?: string;
 		isCompleted?: boolean;
+		categoryId?: string | null;
 	} = {};
 
 	if (data.title !== undefined) {
@@ -132,13 +192,42 @@ export async function updateItem(
 		updateData.isCompleted = data.is_completed;
 	}
 
-	const [updatedItem] = await db
-		.update(listItems)
-		.set(updateData)
-		.where(eq(listItems.id, itemId))
-		.returning();
+	if (data.categoryId !== undefined) {
+		updateData.categoryId = data.categoryId || null;
+	}
 
-	return updatedItem;
+	await db.update(listItems).set(updateData).where(eq(listItems.id, itemId));
+
+	const [itemWithCategory] = await db
+		.select({
+			id: listItems.id,
+			listId: listItems.listId,
+			title: listItems.title,
+			description: listItems.description,
+			isCompleted: listItems.isCompleted,
+			categoryId: listItems.categoryId,
+			categoryIcon: categories.icon,
+			createdAt: listItems.createdAt,
+		})
+		.from(listItems)
+		.leftJoin(categories, eq(listItems.categoryId, categories.id))
+		.where(eq(listItems.id, itemId))
+		.limit(1);
+
+	if (!itemWithCategory) {
+		throw new NotFoundError("Nie znaleziono zaktualizowanego elementu");
+	}
+
+	return {
+		id: itemWithCategory.id,
+		listId: itemWithCategory.listId,
+		title: itemWithCategory.title,
+		description: itemWithCategory.description,
+		isCompleted: itemWithCategory.isCompleted,
+		categoryId: itemWithCategory.categoryId,
+		categoryIcon: itemWithCategory.categoryIcon ?? null,
+		createdAt: itemWithCategory.createdAt,
+	};
 }
 
 export async function deleteItem(
