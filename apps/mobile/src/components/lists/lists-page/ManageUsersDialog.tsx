@@ -7,7 +7,7 @@ import { UserPlus, X } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { useRemoveShare, useShareList, useShares } from "@/api/shares.api";
-import { UserAvatar } from "@/components/lists/UserAvatar";
+import { UserAvatar } from "@/components/lists/shared/UserAvatar";
 import { Button } from "@/components/ui/Button";
 import {
 	Dialog,
@@ -20,7 +20,7 @@ import {
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { Text } from "@/components/ui/Text";
-import { useAuth } from "@/contexts/auth.context";
+import { useIsListOwner } from "@/hooks/useIsListOwner";
 
 interface ManageUsersDialogProps {
 	list: ListWithDetails;
@@ -37,18 +37,16 @@ function isValidEmail(email: string): boolean {
 export function ManageUsersDialog(props: ManageUsersDialogProps) {
 	const { list, open, onOpenChange } = props;
 
-	const { user } = useAuth();
-
 	const [email, setEmail] = useState("");
 	const [emailError, setEmailError] = useState("");
 
 	const { data: sharesData } = useShares(list.id);
-	const shares = (sharesData?.shares as ShareWithUser[]) ?? [];
-	const author = sharesData?.author as SharesAuthor | undefined;
+	const shares = sharesData?.shares ?? [];
+	const author = sharesData?.author;
 
 	const { mutate: shareList, isPending: isSharing } = useShareList(list.id);
 
-	const isOwner = user?.id === list.authorId;
+	const isOwner = useIsListOwner(list);
 
 	function handleShare() {
 		const trimmedEmail = email.trim();
@@ -164,7 +162,7 @@ function AuthorItem(props: AuthorItemProps) {
 
 	return (
 		<View className="flex-row items-center gap-3 py-1">
-			<UserAvatar name={author.name} size="sm" />
+			<UserAvatar name={author.name} />
 			<View className="flex-1">
 				<View className="flex-row items-center gap-2">
 					<Text className="text-sm font-medium">{author.name}</Text>
@@ -214,7 +212,7 @@ function ShareItem(props: ShareItemProps) {
 
 	return (
 		<View className="flex-row items-center gap-3 py-1">
-			<UserAvatar name={share.userName} size="sm" />
+			<UserAvatar name={share.userName} />
 			<View className="flex-1">
 				<Text className="text-sm font-medium">{share.userName}</Text>
 				<Text className="text-xs text-muted-foreground">{share.userEmail}</Text>

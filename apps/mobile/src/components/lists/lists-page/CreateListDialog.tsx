@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react-native";
 import { useState } from "react";
-import { Alert, Pressable } from "react-native";
+import { Alert } from "react-native";
 import { useCreateList } from "@/api/lists.api";
 import { Button } from "@/components/ui/Button";
 import {
@@ -65,12 +65,14 @@ export function CreateListDialog() {
 
 	return (
 		<>
-			<Pressable
+			<Button
 				onPress={() => setIsCreateOpen(true)}
-				className="size-10 items-center justify-center rounded-full bg-primary active:bg-primary/90"
+				size="lg"
+				className="w-full"
 			>
 				<Icon as={Plus} className="text-primary-foreground" size={20} />
-			</Pressable>
+				<Text>Utwórz listę</Text>
+			</Button>
 
 			<Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
 				<DialogContent>

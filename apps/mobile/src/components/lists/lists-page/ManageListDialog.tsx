@@ -15,6 +15,7 @@ import {
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { Text } from "@/components/ui/Text";
+import { useIsListOwner } from "@/hooks/useIsListOwner";
 
 interface ManageListDialogProps {
 	list: ListWithDetails;
@@ -22,6 +23,8 @@ interface ManageListDialogProps {
 
 export function ManageListDialog(props: ManageListDialogProps) {
 	const { list } = props;
+
+	const isOwner = useIsListOwner(list);
 
 	const [isManageOpen, setIsManageOpen] = useState(false);
 	const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -94,13 +97,15 @@ export function ManageListDialog(props: ManageListDialogProps) {
 						autoFocus
 					/>
 					<DialogFooter>
-						<Button
-							variant="destructive"
-							onPress={handleDeleteConfirm}
-							disabled={isPending}
-						>
-							<Text>Usuń</Text>
-						</Button>
+						{isOwner && (
+							<Button
+								variant="destructive"
+								onPress={handleDeleteConfirm}
+								disabled={isPending}
+							>
+								<Text>Usuń</Text>
+							</Button>
+						)}
 						<Button
 							variant="outline"
 							onPress={() => {

@@ -1,12 +1,12 @@
 import type { ListWithDetails } from "@collab-list/shared/types";
-import { MoreHorizontal, Plus } from "lucide-react-native";
+import { Eye, Plus } from "lucide-react-native";
 import { useState } from "react";
 import { type GestureResponderEvent, Pressable, View } from "react-native";
-import { ManageUsersDialog } from "@/components/lists/ManageUsersDialog";
-import { UserAvatar } from "@/components/lists/UserAvatar";
+import { UserAvatar } from "@/components/lists/shared/UserAvatar";
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icon";
-import { useAuth } from "@/contexts/auth.context";
+import { useIsListOwner } from "@/hooks/useIsListOwner";
+import { ManageUsersDialog } from "./ManageUsersDialog";
 
 const MAX_VISIBLE_AVATARS = 3;
 
@@ -17,11 +17,9 @@ interface ManageUsersProps {
 export function ManageUsers(props: ManageUsersProps) {
 	const { list } = props;
 
-	const { user } = useAuth();
-
 	const [isManageUsersOpen, setIsManageUsersOpen] = useState(false);
 
-	const isOwner = user?.id === list.authorId;
+	const isOwner = useIsListOwner(list);
 	const visibleShares = list.shares.slice(0, MAX_VISIBLE_AVATARS);
 	const hasShares = list.shares.length > 0;
 
@@ -40,7 +38,6 @@ export function ManageUsers(props: ManageUsersProps) {
 					>
 						<UserAvatar
 							name={share.userName}
-							size="md"
 							className="border-2 border-background"
 						/>
 					</View>
@@ -56,9 +53,9 @@ export function ManageUsers(props: ManageUsersProps) {
 					>
 						<AvatarFallback>
 							<Icon
-								as={isOwner ? Plus : MoreHorizontal}
+								as={isOwner ? Plus : Eye}
 								className="text-muted-foreground"
-								size={16}
+								size={14}
 							/>
 						</AvatarFallback>
 					</Avatar>
