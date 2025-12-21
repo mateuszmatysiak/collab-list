@@ -1,5 +1,6 @@
 import {
 	createItemSchema,
+	reorderItemsSchema,
 	updateItemSchema,
 } from "@collab-list/shared/validators";
 import type { Context } from "hono";
@@ -8,6 +9,7 @@ import {
 	createItem,
 	deleteItem,
 	getItems,
+	reorderItems,
 	updateItem,
 } from "../services/items.service";
 import { createJsonValidator, getValidatedJson } from "../utils/validator";
@@ -72,5 +74,19 @@ export const deleteItemController = [
 		await deleteItem(itemId, listId, userId);
 
 		return c.json({ message: "Element usunięty pomyślnie" });
+	},
+];
+
+export const reorderItemsController = [
+	authMiddleware,
+	createJsonValidator(reorderItemsSchema),
+	async (c: Context) => {
+		const userId = c.get("userId");
+		const listId = c.req.param("listId");
+		const { itemIds } = getValidatedJson(c, reorderItemsSchema);
+
+		await reorderItems(listId, userId, itemIds);
+
+		return c.json({ message: "Kolejność elementów zaktualizowana" });
 	},
 ];

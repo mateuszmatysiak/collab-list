@@ -1,5 +1,5 @@
 import type { ListRole } from "@collab-list/shared/types";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, max } from "drizzle-orm";
 import { db } from "../db/index";
 import { categories, listItems, listShares, lists } from "../db/schema";
 import { ForbiddenError, NotFoundError } from "../utils/errors";
@@ -51,12 +51,13 @@ export async function getItems(listId: string, userId: string) {
 			isCompleted: listItems.isCompleted,
 			categoryId: listItems.categoryId,
 			categoryIcon: categories.icon,
+			position: listItems.position,
 			createdAt: listItems.createdAt,
 		})
 		.from(listItems)
 		.leftJoin(categories, eq(listItems.categoryId, categories.id))
 		.where(eq(listItems.listId, listId))
-		.orderBy(listItems.createdAt);
+		.orderBy(listItems.position);
 
 	return items.map((item) => ({
 		id: item.id,
@@ -66,6 +67,7 @@ export async function getItems(listId: string, userId: string) {
 		isCompleted: item.isCompleted,
 		categoryId: item.categoryId,
 		categoryIcon: item.categoryIcon ?? null,
+		position: item.position,
 		createdAt: item.createdAt,
 	}));
 }
@@ -89,6 +91,13 @@ export async function createItem(
 		);
 	}
 
+	const [maxPositionResult] = await db
+		.select({ maxPosition: max(listItems.position) })
+		.from(listItems)
+		.where(eq(listItems.listId, listId));
+
+	const nextPosition = (maxPositionResult?.maxPosition ?? -1) + 1;
+
 	const [item] = await db
 		.insert(listItems)
 		.values({
@@ -97,6 +106,7 @@ export async function createItem(
 			description,
 			isCompleted: false,
 			categoryId: categoryId || null,
+			position: nextPosition,
 		})
 		.returning();
 
@@ -113,6 +123,7 @@ export async function createItem(
 			isCompleted: listItems.isCompleted,
 			categoryId: listItems.categoryId,
 			categoryIcon: categories.icon,
+			position: listItems.position,
 			createdAt: listItems.createdAt,
 		})
 		.from(listItems)
@@ -132,6 +143,7 @@ export async function createItem(
 		isCompleted: itemWithCategory.isCompleted,
 		categoryId: itemWithCategory.categoryId,
 		categoryIcon: itemWithCategory.categoryIcon ?? null,
+		position: itemWithCategory.position,
 		createdAt: itemWithCategory.createdAt,
 	};
 }
@@ -207,6 +219,7 @@ export async function updateItem(
 			isCompleted: listItems.isCompleted,
 			categoryId: listItems.categoryId,
 			categoryIcon: categories.icon,
+			position: listItems.position,
 			createdAt: listItems.createdAt,
 		})
 		.from(listItems)
@@ -226,6 +239,7 @@ export async function updateItem(
 		isCompleted: itemWithCategory.isCompleted,
 		categoryId: itemWithCategory.categoryId,
 		categoryIcon: itemWithCategory.categoryIcon ?? null,
+		position: itemWithCategory.position,
 		createdAt: itemWithCategory.createdAt,
 	};
 }
@@ -262,4 +276,43 @@ export async function deleteItem(
 	}
 
 	await db.delete(listItems).where(eq(listItems.id, itemId));
+}
+
+export async function reorderItems(
+	listId: string,
+	userId: string,
+	itemIds: string[],
+) {
+	const access = await checkListAccess(listId, userId);
+
+	if (!access) {
+		throw new NotFoundError("Nie znaleziono listy");
+	}
+
+	if (access !== "owner" && access !== "editor") {
+		throw new ForbiddenError(
+			"Nie masz uprawnień do zmiany kolejności elementów tej listy",
+		);
+	}
+
+	const existingItems = await db
+		.select({ id: listItems.id })
+		.from(listItems)
+		.where(and(eq(listItems.listId, listId), inArray(listItems.id, itemIds)));
+
+	const existingIds = new Set(existingItems.map((item) => item.id));
+	const invalidIds = itemIds.filter((id) => !existingIds.has(id));
+
+	if (invalidIds.length > 0) {
+		throw new NotFoundError("Niektóre elementy nie należą do tej listy");
+	}
+
+	await Promise.all(
+		itemIds.map((itemId, index) =>
+			db
+				.update(listItems)
+				.set({ position: index })
+				.where(eq(listItems.id, itemId)),
+		),
+	);
 }

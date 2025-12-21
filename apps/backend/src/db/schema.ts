@@ -1,6 +1,7 @@
 import {
 	boolean,
 	index,
+	integer,
 	pgEnum,
 	pgTable,
 	timestamp,
@@ -49,6 +50,7 @@ export const listItems = pgTable(
 		categoryId: uuid("category_id").references(() => categories.id, {
 			onDelete: "set null",
 		}),
+		position: integer("position").default(0).notNull(),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 	},
 	(table) => [
