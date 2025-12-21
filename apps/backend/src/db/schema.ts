@@ -46,9 +46,15 @@ export const listItems = pgTable(
 		title: varchar("title", { length: 1000 }).notNull(),
 		description: varchar("description", { length: 2000 }),
 		isCompleted: boolean("is_completed").default(false).notNull(),
+		categoryId: uuid("category_id").references(() => categories.id, {
+			onDelete: "set null",
+		}),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 	},
-	(table) => [index("list_items_list_id_idx").on(table.listId)],
+	(table) => [
+		index("list_items_list_id_idx").on(table.listId),
+		index("list_items_category_id_idx").on(table.categoryId),
+	],
 );
 
 export const listShares = pgTable(
@@ -85,4 +91,24 @@ export const refreshTokens = pgTable(
 		index("refresh_tokens_user_id_idx").on(table.userId),
 		index("refresh_tokens_token_idx").on(table.token),
 	],
+);
+
+export const categories = pgTable("categories", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	name: varchar("name", { length: 255 }).notNull(),
+	icon: varchar("icon", { length: 100 }).notNull(),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const categoryItems = pgTable(
+	"category_items",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		categoryId: uuid("category_id")
+			.notNull()
+			.references(() => categories.id, { onDelete: "cascade" }),
+		name: varchar("name", { length: 500 }).notNull(),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => [index("category_items_category_id_idx").on(table.categoryId)],
 );
