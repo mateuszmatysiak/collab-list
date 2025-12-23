@@ -4,9 +4,9 @@ import { Text } from "@/components/ui/Text";
 import type { ListFilter } from "./ListsContent";
 
 const FILTERS: { value: ListFilter; label: string }[] = [
-	{ value: "all", label: "Wszystkie" },
-	{ value: "mine", label: "Moje" },
-	{ value: "shared", label: "Udostępnione" },
+	{ value: "all", label: "Wszystkie listy" },
+	{ value: "mine", label: "Moje listy" },
+	{ value: "shared", label: "Udostępnione mi listy" },
 ];
 
 interface ListFiltersProps {

@@ -5,7 +5,7 @@ import { Text } from "@/components/ui/Text";
 export type ItemFilter = "all" | "completed" | "incomplete";
 
 const FILTER_ITEMS: { value: ItemFilter; label: string }[] = [
-	{ value: "all", label: "Wszystkie" },
+	{ value: "all", label: "Wszystkie statusy" },
 	{ value: "completed", label: "Ukończone" },
 	{ value: "incomplete", label: "Nieukończone" },
 ];
