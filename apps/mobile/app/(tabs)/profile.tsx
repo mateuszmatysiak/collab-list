@@ -1,4 +1,4 @@
-import { Calendar, ListTodo, Mail, Users } from "lucide-react-native";
+import { Calendar, ListTodo, Mail, Moon, Users } from "lucide-react-native";
 import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLists } from "@/api/lists.api";
@@ -6,13 +6,16 @@ import { LogoutDialog } from "@/components/auth/LogoutDialog";
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
+import { Switch } from "@/components/ui/Switch";
 import { Text } from "@/components/ui/Text";
 import { useAuth } from "@/contexts/auth.context";
+import { useTheme } from "@/contexts/theme.context";
 import { formatDate, getInitials } from "@/lib/utils";
 
 export default function ProfileScreen() {
 	const { user } = useAuth();
 	const { data: lists } = useLists();
+	const { theme, toggleTheme } = useTheme();
 
 	if (!user) {
 		return (
@@ -102,6 +105,33 @@ export default function ProfileScreen() {
 										</Text>
 									</View>
 								</View>
+							</View>
+						</CardContent>
+					</Card>
+
+					<Card>
+						<CardHeader>
+							<CardTitle>Ustawienia</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<View className="flex-row items-center justify-between">
+								<View className="flex-row items-center gap-3">
+									<View className="size-10 items-center justify-center rounded-full bg-primary/10">
+										<Icon as={Moon} className="text-primary" size={20} />
+									</View>
+									<View>
+										<Text className="text-sm font-medium">Tryb ciemny</Text>
+										<Text className="text-xs text-muted-foreground">
+											Włącz ciemny motyw
+										</Text>
+									</View>
+								</View>
+								<Switch
+									value={theme === "dark"}
+									onValueChange={() => {
+										void toggleTheme();
+									}}
+								/>
 							</View>
 						</CardContent>
 					</Card>

@@ -5,10 +5,10 @@ import { useState } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCategory } from "@/api/categories.api";
-import { AddPredefinedItemDialog } from "@/components/categories/category-page/AddPredefinedItemDialog";
+import { AddCategoryItemDialog } from "@/components/categories/category-page/AddCategoryItemDialog";
+import { CategoryItemsList } from "@/components/categories/category-page/CategoryItemsList";
 import { DeleteCategoryDialog } from "@/components/categories/category-page/DeleteCategoryDialog";
 import { EditCategoryDialog } from "@/components/categories/category-page/EditCategoryDialog";
-import { PredefinedItemsList } from "@/components/categories/category-page/PredefinedItemsList";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
@@ -98,10 +98,10 @@ export default function CategoryDetailScreen() {
 				</Text>
 			</View>
 
-			<PredefinedItemsList categoryId={category.id} items={category.items} />
+			<CategoryItemsList categoryId={category.id} items={category.items} />
 
 			<View className="px-6 pb-6">
-				<AddPredefinedItemDialog categoryId={category.id} />
+				<AddCategoryItemDialog categoryId={category.id} />
 			</View>
 
 			<EditCategoryDialog

@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Text } from "@/components/ui/Text";
 import { useAuth } from "@/contexts/auth.context";
 import type { ApiErrorResponse } from "@/types/api";
@@ -108,12 +109,11 @@ export default function LoginScreen() {
 								control={control}
 								name="password"
 								render={({ field: { onChange, onBlur, value } }) => (
-									<Input
+									<PasswordInput
 										placeholder="Hasło"
 										value={value}
 										onChangeText={onChange}
 										onBlur={onBlur}
-										secureTextEntry
 										autoCapitalize="none"
 										autoComplete="password"
 										accessibilityLabel="Hasło"

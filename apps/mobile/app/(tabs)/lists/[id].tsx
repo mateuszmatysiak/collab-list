@@ -1,5 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,8 +9,8 @@ import {
 	type ItemFilter,
 	ItemFilters,
 } from "@/components/lists/list-page/ItemFilters";
+import { ListHeader } from "@/components/lists/list-page/ListHeader";
 import { ListItemsContent } from "@/components/lists/list-page/ListItemsContent";
-import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
 
 interface ListDetailContentProps {
@@ -46,10 +45,6 @@ function ListDetailContent(props: ListDetailContentProps) {
 
 	const handleCategoryChange = useCallback((categoryId: string | null) => {
 		setSelectedCategoryId(categoryId);
-	}, []);
-
-	const handleGoBack = useCallback(() => {
-		router.back();
 	}, []);
 
 	const handleRefresh = useCallback(() => {
@@ -103,16 +98,7 @@ function ListDetailContent(props: ListDetailContentProps) {
 
 	return (
 		<>
-			<View className="flex-row items-center gap-3 px-4 py-3">
-				<Pressable
-					onPress={handleGoBack}
-					className="size-10 items-center justify-center rounded-full active:bg-accent"
-					hitSlop={8}
-				>
-					<Icon as={ArrowLeft} className="text-foreground" size={20} />
-				</Pressable>
-				<Text className="flex-1 text-xl font-bold">{list.name}</Text>
-			</View>
+			<ListHeader list={list} />
 
 			<ItemFilters filter={filter} onFilterChange={handleFilterChange} />
 
