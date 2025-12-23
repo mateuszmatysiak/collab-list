@@ -38,7 +38,7 @@ export default function LoginScreen() {
 
 		try {
 			await login(data.email, data.password);
-			router.replace("/(tabs)");
+			router.replace("/(tabs)/lists");
 		} catch (err) {
 			const axiosError = err as AxiosError<ApiErrorResponse>;
 
