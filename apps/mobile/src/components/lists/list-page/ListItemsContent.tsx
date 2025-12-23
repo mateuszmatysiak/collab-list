@@ -1,26 +1,44 @@
 import type { ListItem } from "@collab-list/shared/types";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { RefreshControl, View } from "react-native";
 import DragList, { type DragListRenderItemInfo } from "react-native-draglist";
 import { useReorderItems } from "@/api/items.api";
-import { Text } from "@/components/ui/Text";
-import { AddItemDialog } from "./AddItemDialog";
+import { UNCATEGORIZED_FILTER } from "@/lib/constants";
+import { AddItemCard } from "./AddItemCard";
 import type { ItemFilter } from "./ItemFilters";
 import { ListItemCard } from "./ListItemCard";
 
 const ITEM_SEPARATOR_HEIGHT = 12;
 
-function EmptyList() {
-	return (
-		<View className="flex-1 items-center justify-center gap-4 py-12">
-			<Text className="text-lg font-medium text-muted-foreground">
-				Brak elementów
-			</Text>
-			<Text className="text-sm text-muted-foreground">
-				Dodaj pierwszy element, klikając przycisk poniżej
-			</Text>
-		</View>
-	);
+function filterByStatus(items: ListItem[], filter: ItemFilter): ListItem[] {
+	switch (filter) {
+		case "completed":
+			return items.filter((item) => item.isCompleted);
+		case "incomplete":
+			return items.filter((item) => !item.isCompleted);
+		default:
+			return items;
+	}
+}
+
+function filterByCategory(
+	items: ListItem[],
+	categoryId: string | null,
+): ListItem[] {
+	if (categoryId === null) return items;
+	if (categoryId === UNCATEGORIZED_FILTER) {
+		return items.filter((item) => item.categoryId === null);
+	}
+	return items.filter((item) => item.categoryId === categoryId);
+}
+
+function sortByCompletionStatus(items: ListItem[]): ListItem[] {
+	return [...items].sort((a, b) => {
+		if (a.isCompleted === b.isCompleted) {
+			return a.position - b.position;
+		}
+		return a.isCompleted ? 1 : -1;
+	});
 }
 
 interface ListItemsContentProps {
@@ -43,35 +61,26 @@ export function ListItemsContent(props: ListItemsContentProps) {
 	} = props;
 
 	const { mutate: reorderItems } = useReorderItems(listId);
+	const newItemIdsRef = useRef<Set<string>>(new Set());
+
+	const handleItemCreated = useCallback((itemId: string) => {
+		newItemIdsRef.current.add(itemId);
+	}, []);
 
 	const filteredItems = useMemo(() => {
-		let filtered = items;
-
-		switch (filter) {
-			case "all":
-				filtered = items;
-				break;
-			case "completed":
-				filtered = items.filter((item) => item.isCompleted);
-				break;
-			case "incomplete":
-				filtered = items.filter((item) => !item.isCompleted);
-				break;
-			default:
-				filtered = items;
-		}
-
-		if (categoryId !== null && categoryId !== undefined) {
-			filtered = filtered.filter((item) => item.categoryId === categoryId);
-		}
-
-		return filtered;
+		const byStatus = filterByStatus(items, filter);
+		return filterByCategory(byStatus, categoryId);
 	}, [items, filter, categoryId]);
+
+	const sortedItems = useMemo(
+		() => sortByCompletionStatus(filteredItems),
+		[filteredItems],
+	);
 
 	const handleReordered = useCallback(
 		(fromIndex: number, toIndex: number) => {
-			const movedItem = filteredItems[fromIndex];
-			const targetItem = filteredItems[toIndex];
+			const movedItem = sortedItems[fromIndex];
+			const targetItem = sortedItems[toIndex];
 			if (!movedItem || !targetItem) return;
 
 			const fullFromIndex = items.findIndex((item) => item.id === movedItem.id);
@@ -86,12 +95,17 @@ export function ListItemsContent(props: ListItemsContentProps) {
 			const itemIds = newOrder.map((item) => item.id);
 			reorderItems({ itemIds });
 		},
-		[items, filteredItems, reorderItems],
+		[items, sortedItems, reorderItems],
 	);
 
 	const renderItem = useCallback(
 		(info: DragListRenderItemInfo<ListItem>) => {
 			const { item, onDragStart, onDragEnd, isActive } = info;
+			const isNewItem = newItemIdsRef.current.has(item.id);
+
+			if (isNewItem) {
+				newItemIdsRef.current.delete(item.id);
+			}
 
 			return (
 				<View style={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}>
@@ -99,6 +113,7 @@ export function ListItemsContent(props: ListItemsContentProps) {
 						item={item}
 						listId={listId}
 						isActive={isActive}
+						isNewItem={isNewItem}
 						onDragStart={onDragStart}
 						onDragEnd={onDragEnd}
 					/>
@@ -108,20 +123,9 @@ export function ListItemsContent(props: ListItemsContentProps) {
 		[listId],
 	);
 
-	if (filteredItems.length === 0) {
-		return (
-			<View className="flex-1 px-4">
-				<EmptyList />
-				<View className="py-4">
-					<AddItemDialog listId={listId} />
-				</View>
-			</View>
-		);
-	}
-
 	return (
 		<DragList
-			data={filteredItems}
+			data={sortedItems}
 			keyExtractor={(item) => item.id}
 			renderItem={renderItem}
 			onReordered={handleReordered}
@@ -131,9 +135,7 @@ export function ListItemsContent(props: ListItemsContentProps) {
 				<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
 			}
 			ListFooterComponent={
-				<View className="py-4">
-					<AddItemDialog listId={listId} />
-				</View>
+				<AddItemCard listId={listId} onItemCreated={handleItemCreated} />
 			}
 		/>
 	);

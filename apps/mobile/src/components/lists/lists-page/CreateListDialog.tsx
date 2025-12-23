@@ -1,51 +1,20 @@
+import { router } from "expo-router";
 import { Plus } from "lucide-react-native";
-import { useState } from "react";
 import { Alert } from "react-native";
 import { useCreateList } from "@/api/lists.api";
 import { Button } from "@/components/ui/Button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/Dialog";
 import { Icon } from "@/components/ui/Icon";
-import { Input } from "@/components/ui/Input";
 import { Text } from "@/components/ui/Text";
 
-const MIN_NAME_LENGTH = 1;
-const MAX_NAME_LENGTH = 500;
-
-export function CreateListDialog() {
-	const [isCreateOpen, setIsCreateOpen] = useState(false);
-	const [name, setName] = useState("");
-	const [nameError, setNameError] = useState("");
-
+export function CreateListButton() {
 	const { mutate: createList, isPending } = useCreateList();
 
 	function handleCreate() {
-		const trimmedName = name.trim();
-
-		if (!trimmedName || trimmedName.length < MIN_NAME_LENGTH) {
-			setNameError("Nazwa listy jest wymagana");
-			return;
-		}
-
-		if (trimmedName.length > MAX_NAME_LENGTH) {
-			setNameError(`Nazwa może mieć maksymalnie ${MAX_NAME_LENGTH} znaków`);
-			return;
-		}
-
-		setNameError("");
-
 		createList(
-			{ name: trimmedName },
+			{ name: "Nowa lista" },
 			{
-				onSuccess: () => {
-					setName("");
-					setIsCreateOpen(false);
+				onSuccess: (data) => {
+					router.push(`/(tabs)/lists/${data.list.id}`);
 				},
 				onError: () => {
 					Alert.alert(
@@ -57,59 +26,15 @@ export function CreateListDialog() {
 		);
 	}
 
-	function handleClose() {
-		setName("");
-		setNameError("");
-		setIsCreateOpen(false);
-	}
-
-	function handleChangeName(text: string) {
-		setName(text);
-		if (nameError) setNameError("");
-	}
-
 	return (
-		<>
-			<Button
-				onPress={() => setIsCreateOpen(true)}
-				size="lg"
-				className="w-full"
-			>
-				<Icon as={Plus} className="text-primary-foreground" size={20} />
-				<Text>Utwórz listę</Text>
-			</Button>
-
-			<Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Nowa lista</DialogTitle>
-						<DialogDescription>Utwórz nową listę zakupów.</DialogDescription>
-					</DialogHeader>
-					<Input
-						placeholder="Nazwa listy"
-						value={name}
-						onChangeText={handleChangeName}
-						editable={!isPending}
-						autoFocus
-						maxLength={MAX_NAME_LENGTH}
-					/>
-					{nameError ? (
-						<Text className="text-sm text-destructive">{nameError}</Text>
-					) : null}
-					<DialogFooter>
-						<Button
-							variant="outline"
-							onPress={handleClose}
-							disabled={isPending}
-						>
-							<Text>Anuluj</Text>
-						</Button>
-						<Button onPress={handleCreate} disabled={!name.trim() || isPending}>
-							<Text>{isPending ? "Tworzenie..." : "Utwórz"}</Text>
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
-		</>
+		<Button
+			onPress={handleCreate}
+			size="lg"
+			className="w-full"
+			disabled={isPending}
+		>
+			<Icon as={Plus} className="text-primary-foreground" size={20} />
+			<Text>{isPending ? "Tworzenie..." : "Utwórz listę"}</Text>
+		</Button>
 	);
 }

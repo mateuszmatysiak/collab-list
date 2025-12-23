@@ -6,6 +6,7 @@ import { useItems } from "@/api/items.api";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
+import { UNCATEGORIZED_FILTER } from "@/lib/constants";
 
 function getCategoryIcon(
 	iconName: string | null,
@@ -45,7 +46,16 @@ export function CategoryFilters(props: CategoryFiltersProps) {
 			.sort((a, b) => a.name.localeCompare(b.name));
 	}, [items, allCategories]);
 
-	if (availableCategories.length === 0) {
+	const hasUncategorizedItems = useMemo(() => {
+		if (!items) return false;
+		return items.some((item) => item.categoryId === null);
+	}, [items]);
+
+	const isUncategorizedSelected = useMemo(() => {
+		return selectedCategoryId === UNCATEGORIZED_FILTER;
+	}, [selectedCategoryId]);
+
+	if (availableCategories.length === 0 && !hasUncategorizedItems) {
 		return null;
 	}
 
@@ -90,6 +100,25 @@ export function CategoryFilters(props: CategoryFiltersProps) {
 						</Button>
 					);
 				})}
+
+				{hasUncategorizedItems && (
+					<Button
+						variant={isUncategorizedSelected ? "default" : "outline"}
+						size="sm"
+						onPress={() => onCategoryChange(UNCATEGORIZED_FILTER)}
+					>
+						<Icon
+							as={LucideIcons.Ban}
+							className={
+								isUncategorizedSelected
+									? "text-primary-foreground"
+									: "text-foreground"
+							}
+							size={16}
+						/>
+						<Text>Pozostałe kategorie</Text>
+					</Button>
+				)}
 			</ScrollView>
 		</View>
 	);

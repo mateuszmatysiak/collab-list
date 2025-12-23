@@ -186,53 +186,76 @@ interface ShareItemProps {
 
 function ShareItem(props: ShareItemProps) {
 	const { share, listId, canRemove } = props;
+
+	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
 	const { mutate: removeShare, isPending } = useRemoveShare(
 		listId,
 		share.userId,
 	);
 
 	function handleRemove() {
-		Alert.alert(
-			"Usuń użytkownika",
-			`Czy na pewno chcesz usunąć ${share.userName} z listy?`,
-			[
-				{ text: "Anuluj", style: "cancel" },
-				{
-					text: "Usuń",
-					style: "destructive",
-					onPress: () => {
-						removeShare(undefined, {
-							onError: () => {
-								Alert.alert("Błąd", "Nie udało się usunąć użytkownika.");
-							},
-						});
-					},
-				},
-			],
-		);
+		removeShare(undefined, {
+			onSuccess: () => {
+				setIsDeleteOpen(false);
+			},
+			onError: () => {
+				Alert.alert("Błąd", "Nie udało się usunąć użytkownika.");
+			},
+		});
 	}
 
 	return (
-		<View className="flex-row items-center gap-3 py-1">
-			<UserAvatar name={share.userName} />
-			<View className="flex-1">
-				<Text className="text-sm font-medium">{share.userName}</Text>
-				<Text className="text-xs text-muted-foreground">{share.userEmail}</Text>
+		<>
+			<View className="flex-row items-center gap-3 py-1">
+				<UserAvatar name={share.userName} />
+				<View className="flex-1">
+					<Text className="text-sm font-medium">{share.userName}</Text>
+					<Text className="text-xs text-muted-foreground">
+						{share.userEmail}
+					</Text>
+				</View>
+				{canRemove && (
+					<Pressable
+						onPress={() => setIsDeleteOpen(true)}
+						disabled={isPending}
+						className="size-8 items-center justify-center rounded-full active:bg-accent"
+						hitSlop={8}
+					>
+						<Icon
+							as={X}
+							className={isPending ? "text-muted" : "text-muted-foreground"}
+							size={16}
+						/>
+					</Pressable>
+				)}
 			</View>
-			{canRemove && (
-				<Pressable
-					onPress={handleRemove}
-					disabled={isPending}
-					className="size-8 items-center justify-center rounded-full active:bg-accent"
-					hitSlop={8}
-				>
-					<Icon
-						as={X}
-						className={isPending ? "text-muted" : "text-muted-foreground"}
-						size={16}
-					/>
-				</Pressable>
-			)}
-		</View>
+			<Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Usuń użytkownika</DialogTitle>
+						<DialogDescription>
+							Czy na pewno chcesz usunąć {share.userName} z listy?
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button
+							variant="outline"
+							onPress={() => setIsDeleteOpen(false)}
+							disabled={isPending}
+						>
+							<Text>Anuluj</Text>
+						</Button>
+						<Button
+							variant="destructive"
+							onPress={handleRemove}
+							disabled={isPending}
+						>
+							<Text>{isPending ? "Usuwanie..." : "Usuń"}</Text>
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		</>
 	);
 }

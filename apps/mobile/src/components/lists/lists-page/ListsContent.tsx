@@ -10,10 +10,10 @@ import {
 } from "react-native";
 import { useLists } from "@/api/lists.api";
 import { Text } from "@/components/ui/Text";
-import { CreateListDialog } from "./CreateListDialog";
+import { CreateListButton } from "./CreateListDialog";
 import { ListCard } from "./ListCard";
 
-export type ListFilter = "all" | "mine" | "shared" | "archived";
+export type ListFilter = "all" | "mine" | "shared";
 
 interface ListsContentProps {
 	filter?: ListFilter;
@@ -37,19 +37,7 @@ function ListCardRender(props: { item: ListWithDetails }) {
 	return <ListCard list={item} />;
 }
 
-function EmptyList(props: { filter: ListFilter }) {
-	const { filter } = props;
-
-	if (filter === "archived") {
-		return (
-			<View className="flex-1 items-center justify-center gap-4 py-12">
-				<Text className="text-lg font-medium text-muted-foreground">
-					Brak zarchiwizowanych list
-				</Text>
-			</View>
-		);
-	}
-
+function EmptyList() {
 	return (
 		<View className="flex-1 items-center justify-center gap-4 py-12">
 			<Text className="text-lg font-medium text-muted-foreground">
@@ -112,14 +100,12 @@ export function ListsContent(props: ListsContentProps) {
 			data={filteredLists}
 			keyExtractor={(item) => item.id}
 			renderItem={ListCardRender}
-			ListEmptyComponent={<EmptyList filter={filter} />}
+			ListEmptyComponent={<EmptyList />}
 			ItemSeparatorComponent={SeparatorItem}
 			ListFooterComponent={
-				filter !== "archived" ? (
-					<View className="py-4">
-						<CreateListDialog />
-					</View>
-				) : null
+				<View className="py-4">
+					<CreateListButton />
+				</View>
 			}
 			contentContainerStyle={styles.listContent}
 			showsVerticalScrollIndicator={false}

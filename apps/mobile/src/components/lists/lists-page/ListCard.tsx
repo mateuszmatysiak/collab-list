@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
 import { useIsListOwner } from "@/hooks/useIsListOwner";
-import { ManageListDialog } from "./ManageListDialog";
 import { ManageUsers } from "./ManageUsers";
 
 interface ListCardProps {
@@ -45,8 +44,6 @@ export function ListCard(props: ListCardProps) {
 						<ManageUsers list={list} />
 					</View>
 				</View>
-
-				<ManageListDialog list={list} />
 			</Card>
 		</Pressable>
 	);

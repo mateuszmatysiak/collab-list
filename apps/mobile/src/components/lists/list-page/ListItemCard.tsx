@@ -1,7 +1,7 @@
 import type { ListItem } from "@collab-list/shared/types";
 import * as LucideIcons from "lucide-react-native";
-import { GripVertical, X } from "lucide-react-native";
-import { useState } from "react";
+import { Ban, GripVertical, X } from "lucide-react-native";
+import { useRef, useState } from "react";
 import { Alert, Pressable, View } from "react-native";
 import { useDeleteItem, useUpdateItem } from "@/api/items.api";
 import { Card } from "@/components/ui/Card";
@@ -10,6 +10,7 @@ import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { Text } from "@/components/ui/Text";
 import { cn } from "@/lib/utils";
+import { CategorySelectDialog } from "./CategorySelectDialog";
 
 function getCategoryIcon(
 	iconName: string | null,
@@ -26,19 +27,29 @@ interface ListItemCardProps {
 	item: ListItem;
 	listId: string;
 	isActive?: boolean;
+	isNewItem?: boolean;
 	onDragStart?: () => void;
 	onDragEnd?: () => void;
 }
 
 export function ListItemCard(props: ListItemCardProps) {
-	const { item, listId, isActive, onDragStart, onDragEnd } = props;
+	const {
+		item,
+		listId,
+		isActive,
+		isNewItem = false,
+		onDragStart,
+		onDragEnd,
+	} = props;
 
-	const [isEditingTitle, setIsEditingTitle] = useState(false);
+	const initialEditMode = useRef(isNewItem);
+	const [isEditingTitle, setIsEditingTitle] = useState(initialEditMode.current);
 	const [isEditingDescription, setIsEditingDescription] = useState(false);
 	const [editingTitle, setEditingTitle] = useState(item.title);
 	const [editingDescription, setEditingDescription] = useState(
 		item.description ?? "",
 	);
+	const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
 
 	const { mutate: updateItem } = useUpdateItem(listId, item.id);
 	const { mutate: deleteItem } = useDeleteItem(listId, item.id);
@@ -54,21 +65,6 @@ export function ListItemCard(props: ListItemCardProps) {
 		);
 	}
 
-	function handleDelete() {
-		Alert.alert(
-			"Usuwanie elementu",
-			"Czy na pewno chcesz usunąć ten element?",
-			[
-				{ text: "Anuluj", style: "cancel" },
-				{
-					text: "Usuń",
-					style: "destructive",
-					onPress: () => deleteItem(),
-				},
-			],
-		);
-	}
-
 	function handleTitlePress() {
 		setIsEditingTitle(true);
 		setEditingTitle(item.title);
@@ -80,8 +76,10 @@ export function ListItemCard(props: ListItemCardProps) {
 	}
 
 	function handleTitleBlur() {
-		if (editingTitle.trim() && editingTitle !== item.title) {
-			updateItem({ title: editingTitle.trim() });
+		const trimmedTitle = editingTitle.trim();
+
+		if (trimmedTitle && trimmedTitle !== item.title) {
+			updateItem({ title: trimmedTitle });
 		} else {
 			setEditingTitle(item.title);
 		}
@@ -96,6 +94,17 @@ export function ListItemCard(props: ListItemCardProps) {
 			setEditingDescription(item.description ?? "");
 		}
 		setIsEditingDescription(false);
+	}
+
+	function handleCategorySelect(categoryId: string | null) {
+		updateItem(
+			{ categoryId },
+			{
+				onError: () => {
+					Alert.alert("Błąd", "Nie udało się zaktualizować kategorii.");
+				},
+			},
+		);
 	}
 
 	const CategoryIconComponent = item.categoryIcon
@@ -124,11 +133,22 @@ export function ListItemCard(props: ListItemCardProps) {
 				onCheckedChange={handleCheckboxChange}
 			/>
 
-			{CategoryIconComponent && (
-				<View className="size-8 items-center justify-center rounded-full bg-primary/10">
-					<Icon as={CategoryIconComponent} className="text-primary" size={16} />
-				</View>
-			)}
+			<Pressable
+				onPress={() => setIsCategoryDialogOpen(true)}
+				className={cn(
+					"size-8 items-center justify-center rounded-full",
+					CategoryIconComponent ? "bg-primary/10" : "bg-muted",
+				)}
+				hitSlop={4}
+			>
+				<Icon
+					as={CategoryIconComponent ?? Ban}
+					className={
+						CategoryIconComponent ? "text-primary" : "text-muted-foreground"
+					}
+					size={16}
+				/>
+			</Pressable>
 
 			<View className="flex-1 gap-1">
 				{isEditingTitle ? (
@@ -137,10 +157,11 @@ export function ListItemCard(props: ListItemCardProps) {
 						onChangeText={setEditingTitle}
 						onBlur={handleTitleBlur}
 						autoFocus
+						placeholder="Tytuł elementu..."
 						className={cn(
-							"h-auto border-0 bg-transparent p-0 shadow-none",
-							"text-base font-medium text-primary/50",
-							item.isCompleted && "line-through text-primary/30",
+							"h-auto min-h-0 border-0 bg-transparent p-0 py-0 shadow-none",
+							"text-base font-medium text-foreground",
+							item.isCompleted && "line-through text-muted-foreground",
 						)}
 					/>
 				) : (
@@ -149,9 +170,10 @@ export function ListItemCard(props: ListItemCardProps) {
 							className={cn(
 								"text-base font-medium",
 								item.isCompleted && "line-through text-muted-foreground",
+								!item.title && "text-muted-foreground",
 							)}
 						>
-							{item.title}
+							{item.title || "Tytuł elementu..."}
 						</Text>
 					</Pressable>
 				)}
@@ -163,7 +185,8 @@ export function ListItemCard(props: ListItemCardProps) {
 						onBlur={handleDescriptionBlur}
 						autoFocus
 						placeholder="Dodatkowy opis..."
-						className="h-auto border-0 bg-transparent p-0 shadow-none text-sm text-primary/70"
+						className="h-auto min-h-0 border-0 bg-transparent p-0 py-0 shadow-none text-sm text-muted-foreground"
+						style={{ textAlignVertical: "top" }}
 					/>
 				) : (
 					<Pressable onPress={handleDescriptionPress}>
@@ -175,12 +198,25 @@ export function ListItemCard(props: ListItemCardProps) {
 			</View>
 
 			<Pressable
-				onPress={handleDelete}
+				onPress={() =>
+					deleteItem(undefined, {
+						onError: () => {
+							Alert.alert("Błąd", "Nie udało się usunąć elementu.");
+						},
+					})
+				}
 				className="size-8 items-center justify-center rounded-full active:bg-destructive/20"
 				hitSlop={8}
 			>
 				<Icon as={X} className="text-destructive" size={18} />
 			</Pressable>
+
+			<CategorySelectDialog
+				isOpen={isCategoryDialogOpen}
+				onOpenChange={setIsCategoryDialogOpen}
+				currentCategoryId={item.categoryId}
+				onSelectCategory={handleCategorySelect}
+			/>
 		</Card>
 	);
 }
