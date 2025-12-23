@@ -18,11 +18,11 @@ import { Text } from "@/components/ui/Text";
 const MIN_NAME_LENGTH = 1;
 const MAX_NAME_LENGTH = 500;
 
-interface AddPredefinedItemDialogProps {
+interface AddCategoryItemDialogProps {
 	categoryId: string;
 }
 
-export function AddPredefinedItemDialog(props: AddPredefinedItemDialogProps) {
+export function AddCategoryItemDialog(props: AddCategoryItemDialogProps) {
 	const { categoryId } = props;
 
 	const [isOpen, setIsOpen] = useState(false);
@@ -86,7 +86,7 @@ export function AddPredefinedItemDialog(props: AddPredefinedItemDialogProps) {
 					<DialogHeader>
 						<DialogTitle>Nowy element</DialogTitle>
 						<DialogDescription>
-							Dodaj nowy pre-definiowany element do kategorii.
+							Dodaj nowy element do kategorii.
 						</DialogDescription>
 					</DialogHeader>
 					<Input

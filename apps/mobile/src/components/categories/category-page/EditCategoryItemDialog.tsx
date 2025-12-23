@@ -17,14 +17,14 @@ import { Text } from "@/components/ui/Text";
 const MIN_NAME_LENGTH = 1;
 const MAX_NAME_LENGTH = 500;
 
-interface EditPredefinedItemDialogProps {
+interface EditCategoryItemDialogProps {
 	categoryId: string;
 	item: CategoryItem;
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
 }
 
-export function EditPredefinedItemDialog(props: EditPredefinedItemDialogProps) {
+export function EditCategoryItemDialog(props: EditCategoryItemDialogProps) {
 	const { categoryId, item, isOpen, onOpenChange } = props;
 
 	const [name, setName] = useState(item.name);

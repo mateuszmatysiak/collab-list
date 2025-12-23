@@ -11,7 +11,7 @@ export const POPULAR_ICONS = [
 	"Carrot",
 	"Coffee",
 	"Wheat",
-	"Spray",
+	"SprayCan",
 	"Candy",
 	"Package",
 	"Home",
@@ -27,7 +27,7 @@ export const POPULAR_ICONS = [
 	"Pill",
 	"Baby",
 	"Dog",
-	"Flower",
+	"Flower2",
 ] as const;
 
 interface IconPickerProps {
