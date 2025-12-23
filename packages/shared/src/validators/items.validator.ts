@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const createItemSchema = z.object({
-	title: z.string().min(1).max(1000),
-	description: z.string().min(0).max(2000),
+	title: z.string().max(1000),
+	description: z.string().max(2000),
 	categoryId: z.string().uuid().nullable().optional(),
 });
 
