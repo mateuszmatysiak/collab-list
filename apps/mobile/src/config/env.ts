@@ -1,4 +1,4 @@
-import { type MobileEnv, mobileEnvSchema } from "@collab-list/shared/config";
+import { type MobileEnv, mobileEnvSchema } from "./env.schema";
 
 let env: MobileEnv;
 
