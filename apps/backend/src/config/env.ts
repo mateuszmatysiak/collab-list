@@ -1,4 +1,4 @@
-import { type BackendEnv, backendEnvSchema } from "@collab-list/shared/config";
+import { type BackendEnv, backendEnvSchema } from "./env.schema";
 
 let env: BackendEnv;
 

@@ -204,7 +204,7 @@ async function seed() {
 		// Chemia
 		const [chemia] = await db
 			.insert(categories)
-			.values({ name: "Chemia", icon: "Spray" })
+			.values({ name: "Chemia", icon: "SprayCan" })
 			.returning();
 
 		if (!chemia) throw new Error("Nie udało się utworzyć kategorii Chemia");
