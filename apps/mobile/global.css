@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Theme colors are defined in src/lib/theme.ts
+ * Keep these values in sync with that file.
+ * CSS cannot import from TypeScript, so this duplication is necessary.
+ */
 @layer base {
 	:root {
 		--background: 255 255 255;
@@ -24,5 +29,27 @@
 		--input: 228 228 231;
 		--ring: 9 9 11;
 		--radius: 0.5rem;
+	}
+
+	.dark {
+		--background: 9 9 11;
+		--foreground: 250 250 250;
+		--card: 24 24 27;
+		--card-foreground: 250 250 250;
+		--popover: 24 24 27;
+		--popover-foreground: 250 250 250;
+		--primary: 250 250 250;
+		--primary-foreground: 9 9 11;
+		--secondary: 39 39 42;
+		--secondary-foreground: 250 250 250;
+		--muted: 39 39 42;
+		--muted-foreground: 161 161 170;
+		--accent: 39 39 42;
+		--accent-foreground: 250 250 250;
+		--destructive: 239 68 68;
+		--destructive-foreground: 250 250 250;
+		--border: 39 39 42;
+		--input: 39 39 42;
+		--ring: 212 212 216;
 	}
 }
