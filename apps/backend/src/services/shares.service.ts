@@ -100,13 +100,7 @@ export async function removeShare(
 		throw new ForbiddenError("Tylko właściciel może usunąć udostępnienia");
 	}
 
-	const [list] = await db
-		.select()
-		.from(lists)
-		.where(eq(lists.id, listId))
-		.limit(1);
-
-	if (list && list.authorId === userId) {
+	if (ownerId === userId) {
 		throw new ConflictError("Nie możesz usunąć właściciela z listy");
 	}
 

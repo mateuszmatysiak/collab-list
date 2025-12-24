@@ -37,6 +37,13 @@ export const lists = pgTable(
 	(table) => [index("lists_author_id_idx").on(table.authorId)],
 );
 
+export const categories = pgTable("categories", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	name: varchar("name", { length: 255 }).notNull(),
+	icon: varchar("icon", { length: 100 }).notNull(),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const listItems = pgTable(
 	"list_items",
 	{
@@ -93,24 +100,4 @@ export const refreshTokens = pgTable(
 		index("refresh_tokens_user_id_idx").on(table.userId),
 		index("refresh_tokens_token_idx").on(table.token),
 	],
-);
-
-export const categories = pgTable("categories", {
-	id: uuid("id").defaultRandom().primaryKey(),
-	name: varchar("name", { length: 255 }).notNull(),
-	icon: varchar("icon", { length: 100 }).notNull(),
-	createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const categoryItems = pgTable(
-	"category_items",
-	{
-		id: uuid("id").defaultRandom().primaryKey(),
-		categoryId: uuid("category_id")
-			.notNull()
-			.references(() => categories.id, { onDelete: "cascade" }),
-		name: varchar("name", { length: 500 }).notNull(),
-		createdAt: timestamp("created_at").defaultNow().notNull(),
-	},
-	(table) => [index("category_items_category_id_idx").on(table.categoryId)],
 );

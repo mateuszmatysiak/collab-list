@@ -16,7 +16,7 @@ export async function createList(userId: string, name: string) {
 	return list;
 }
 
-async function checkListAccess(
+export async function checkListAccess(
 	listId: string,
 	userId: string,
 ): Promise<ListRole | null> {

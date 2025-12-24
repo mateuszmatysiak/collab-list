@@ -1,39 +1,8 @@
-import type { ListRole } from "@collab-list/shared/types";
 import { and, eq, inArray, max } from "drizzle-orm";
 import { db } from "../db/index";
-import { categories, listItems, listShares, lists } from "../db/schema";
+import { categories, listItems } from "../db/schema";
 import { ForbiddenError, NotFoundError } from "../utils/errors";
-
-async function checkListAccess(
-	listId: string,
-	userId: string,
-): Promise<ListRole | null> {
-	const [list] = await db
-		.select()
-		.from(lists)
-		.where(eq(lists.id, listId))
-		.limit(1);
-
-	if (!list) {
-		return null;
-	}
-
-	if (list.authorId === userId) {
-		return "owner";
-	}
-
-	const [share] = await db
-		.select()
-		.from(listShares)
-		.where(and(eq(listShares.listId, listId), eq(listShares.userId, userId)))
-		.limit(1);
-
-	if (share) {
-		return share.role;
-	}
-
-	return null;
-}
+import { checkListAccess } from "./lists.service";
 
 export async function getItems(listId: string, userId: string) {
 	const access = await checkListAccess(listId, userId);
