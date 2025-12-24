@@ -1,7 +1,6 @@
 import type { ListItem } from "@collab-list/shared/types";
-import * as LucideIcons from "lucide-react-native";
 import { Ban, GripVertical, X } from "lucide-react-native";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Alert, Pressable, View } from "react-native";
 import { useDeleteItem, useUpdateItem } from "@/api/items.api";
 import { Card } from "@/components/ui/Card";
@@ -9,41 +8,24 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { Text } from "@/components/ui/Text";
+import { getCategoryIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { CategorySelectDialog } from "./CategorySelectDialog";
-
-function getCategoryIcon(
-	iconName: string | null,
-): LucideIcons.LucideIcon | null {
-	if (!iconName) return null;
-	const icons = LucideIcons as unknown as Record<
-		string,
-		LucideIcons.LucideIcon
-	>;
-	return icons[iconName] || null;
-}
 
 interface ListItemCardProps {
 	item: ListItem;
 	listId: string;
 	isActive?: boolean;
-	isNewItem?: boolean;
 	onDragStart?: () => void;
 	onDragEnd?: () => void;
+	onInputFocus?: () => void;
 }
 
 export function ListItemCard(props: ListItemCardProps) {
-	const {
-		item,
-		listId,
-		isActive,
-		isNewItem = false,
-		onDragStart,
-		onDragEnd,
-	} = props;
+	const { item, listId, isActive, onDragStart, onDragEnd, onInputFocus } =
+		props;
 
-	const initialEditMode = useRef(isNewItem);
-	const [isEditingTitle, setIsEditingTitle] = useState(initialEditMode.current);
+	const [isEditingTitle, setIsEditingTitle] = useState(false);
 	const [isEditingDescription, setIsEditingDescription] = useState(false);
 	const [editingTitle, setEditingTitle] = useState(item.title);
 	const [editingDescription, setEditingDescription] = useState(
@@ -155,11 +137,15 @@ export function ListItemCard(props: ListItemCardProps) {
 					<Input
 						value={editingTitle}
 						onChangeText={setEditingTitle}
+						onFocus={onInputFocus}
 						onBlur={handleTitleBlur}
 						autoFocus
 						placeholder="Tytuł elementu..."
 						className={cn(
-							"h-auto min-h-0 border-0 bg-transparent p-0 py-0 shadow-none",
+							"h-auto min-h-0 border-0 p-0 py-0 shadow-none",
+							item.isCompleted
+								? "bg-muted dark:bg-muted"
+								: "bg-card dark:bg-card",
 							"text-base font-medium text-foreground",
 							item.isCompleted && "line-through text-muted-foreground",
 						)}
@@ -182,11 +168,17 @@ export function ListItemCard(props: ListItemCardProps) {
 					<Input
 						value={editingDescription}
 						onChangeText={setEditingDescription}
+						onFocus={onInputFocus}
 						onBlur={handleDescriptionBlur}
 						autoFocus
 						placeholder="Dodatkowy opis..."
-						className="h-auto min-h-0 border-0 bg-transparent p-0 py-0 shadow-none text-sm text-muted-foreground"
-						style={{ textAlignVertical: "top" }}
+						className={cn(
+							"h-auto min-h-0 border-0 p-0 py-0 shadow-none text-sm text-muted-foreground",
+							item.isCompleted
+								? "bg-muted dark:bg-muted"
+								: "bg-card dark:bg-card",
+						)}
+						textAlignVertical="top"
 					/>
 				) : (
 					<Pressable onPress={handleDescriptionPress}>

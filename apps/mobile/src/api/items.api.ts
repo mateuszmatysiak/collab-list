@@ -31,6 +31,9 @@ export const useCreateItem = (listId: string) => {
 				queryKeys.lists.items(listId),
 				(oldItems = []) => [...oldItems, newItem],
 			);
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.lists.all,
+			});
 		},
 	});
 };
@@ -66,6 +69,9 @@ export const useDeleteItem = (listId: string, itemId: string) => {
 				queryKeys.lists.items(listId),
 				(oldItems = []) => oldItems.filter((item) => item.id !== itemId),
 			);
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.lists.all,
+			});
 		},
 	});
 };

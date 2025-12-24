@@ -1,5 +1,5 @@
-import { useLocalSearchParams } from "expo-router";
-import { useCallback, useState } from "react";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useItems } from "@/api/items.api";
@@ -10,7 +10,10 @@ import {
 	ItemFilters,
 } from "@/components/lists/list-page/ItemFilters";
 import { ListHeader } from "@/components/lists/list-page/ListHeader";
-import { ListItemsContent } from "@/components/lists/list-page/ListItemsContent";
+import {
+	ListItemsContent,
+	type ListItemsContentRef,
+} from "@/components/lists/list-page/ListItemsContent";
 import { Text } from "@/components/ui/Text";
 
 interface ListDetailContentProps {
@@ -19,6 +22,8 @@ interface ListDetailContentProps {
 
 function ListDetailContent(props: ListDetailContentProps) {
 	const { id } = props;
+
+	const listItemsContentRef = useRef<ListItemsContentRef>(null);
 
 	const {
 		data: list,
@@ -37,6 +42,15 @@ function ListDetailContent(props: ListDetailContentProps) {
 	const [filter, setFilter] = useState<ItemFilter>("all");
 	const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
 		null,
+	);
+
+	useFocusEffect(
+		useCallback(() => {
+			const timeout = setTimeout(() => {
+				listItemsContentRef.current?.focusAddItem();
+			}, 300);
+			return () => clearTimeout(timeout);
+		}, []),
 	);
 
 	const handleFilterChange = useCallback((newFilter: ItemFilter) => {
@@ -109,6 +123,7 @@ function ListDetailContent(props: ListDetailContentProps) {
 			/>
 
 			<ListItemsContent
+				ref={listItemsContentRef}
 				listId={id}
 				items={items}
 				filter={filter}

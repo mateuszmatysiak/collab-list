@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/lists/shared/UserAvatar";
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icon";
 import { useIsListOwner } from "@/hooks/useIsListOwner";
+import { cn } from "@/lib/utils";
 import { ManageUsersDialog } from "./ManageUsersDialog";
 
 const MAX_VISIBLE_AVATARS = 3;
@@ -34,7 +35,7 @@ export function ManageUsers(props: ManageUsersProps) {
 				{visibleShares.map((share, index) => (
 					<View
 						key={share.userId}
-						style={{ marginLeft: index === 0 ? 0 : -12 }}
+						className={cn(index === 0 ? "ml-0" : "-ml-3")}
 					>
 						<UserAvatar
 							name={share.userName}
@@ -44,7 +45,7 @@ export function ManageUsers(props: ManageUsersProps) {
 				))}
 				<Pressable
 					onPress={handleManageUsers}
-					style={{ marginLeft: hasShares ? -12 : 0 }}
+					className={cn(hasShares ? "-ml-3" : "ml-0")}
 					hitSlop={8}
 				>
 					<Avatar

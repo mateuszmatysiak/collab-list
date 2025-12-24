@@ -1,14 +1,26 @@
 import type { ListItem } from "@collab-list/shared/types";
-import { useCallback, useMemo, useRef } from "react";
-import { RefreshControl, View } from "react-native";
+import {
+	forwardRef,
+	useCallback,
+	useImperativeHandle,
+	useMemo,
+	useRef,
+} from "react";
+import {
+	type FlatList,
+	KeyboardAvoidingView,
+	Platform,
+	RefreshControl,
+	View,
+} from "react-native";
 import DragList, { type DragListRenderItemInfo } from "react-native-draglist";
 import { useReorderItems } from "@/api/items.api";
 import { UNCATEGORIZED_FILTER } from "@/lib/constants";
-import { AddItemCard } from "./AddItemCard";
+import { AddItemCard, type AddItemCardRef } from "./AddItemCard";
 import type { ItemFilter } from "./ItemFilters";
 import { ListItemCard } from "./ListItemCard";
 
-const ITEM_SEPARATOR_HEIGHT = 12;
+type DragListRef = FlatList<ListItem>;
 
 function filterByStatus(items: ListItem[], filter: ItemFilter): ListItem[] {
 	switch (filter) {
@@ -50,7 +62,14 @@ interface ListItemsContentProps {
 	onRefresh: () => void;
 }
 
-export function ListItemsContent(props: ListItemsContentProps) {
+export interface ListItemsContentRef {
+	focusAddItem: () => void;
+}
+
+export const ListItemsContent = forwardRef<
+	ListItemsContentRef,
+	ListItemsContentProps
+>(function ListItemsContent(props, ref) {
 	const {
 		listId,
 		items,
@@ -60,11 +79,30 @@ export function ListItemsContent(props: ListItemsContentProps) {
 		onRefresh,
 	} = props;
 
+	const listRef = useRef<DragListRef>(null);
+	const addItemRef = useRef<AddItemCardRef>(null);
 	const { mutate: reorderItems } = useReorderItems(listId);
-	const newItemIdsRef = useRef<Set<string>>(new Set());
 
-	const handleItemCreated = useCallback((itemId: string) => {
-		newItemIdsRef.current.add(itemId);
+	useImperativeHandle(ref, () => ({
+		focusAddItem: () => {
+			addItemRef.current?.focus();
+		},
+	}));
+
+	const scrollToEnd = useCallback(() => {
+		setTimeout(() => {
+			listRef.current?.scrollToEnd({ animated: true });
+		}, 100);
+	}, []);
+
+	const scrollToIndex = useCallback((index: number) => {
+		setTimeout(() => {
+			listRef.current?.scrollToIndex({
+				index,
+				animated: true,
+				viewPosition: 0.5,
+			});
+		}, 100);
 	}, []);
 
 	const filteredItems = useMemo(() => {
@@ -100,43 +138,50 @@ export function ListItemsContent(props: ListItemsContentProps) {
 
 	const renderItem = useCallback(
 		(info: DragListRenderItemInfo<ListItem>) => {
-			const { item, onDragStart, onDragEnd, isActive } = info;
-			const isNewItem = newItemIdsRef.current.has(item.id);
-
-			if (isNewItem) {
-				newItemIdsRef.current.delete(item.id);
-			}
+			const { item, index, onDragStart, onDragEnd, isActive } = info;
 
 			return (
-				<View style={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}>
+				<View className="mb-3">
 					<ListItemCard
 						item={item}
 						listId={listId}
 						isActive={isActive}
-						isNewItem={isNewItem}
 						onDragStart={onDragStart}
 						onDragEnd={onDragEnd}
+						onInputFocus={() => scrollToIndex(index)}
 					/>
 				</View>
 			);
 		},
-		[listId],
+		[listId, scrollToIndex],
 	);
 
 	return (
-		<DragList
-			data={sortedItems}
-			keyExtractor={(item) => item.id}
-			renderItem={renderItem}
-			onReordered={handleReordered}
-			contentContainerStyle={{ paddingHorizontal: 16 }}
-			showsVerticalScrollIndicator={false}
-			refreshControl={
-				<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
-			}
-			ListFooterComponent={
-				<AddItemCard listId={listId} onItemCreated={handleItemCreated} />
-			}
-		/>
+		<KeyboardAvoidingView
+			behavior={Platform.OS === "ios" ? "padding" : "height"}
+			style={{ flex: 1 }}
+			keyboardVerticalOffset={Platform.OS === "ios" ? 120 : 0}
+		>
+			<DragList
+				ref={listRef}
+				data={sortedItems}
+				keyExtractor={(item) => item.id}
+				renderItem={renderItem}
+				onReordered={handleReordered}
+				contentContainerClassName="px-4 pb-5"
+				showsVerticalScrollIndicator={false}
+				keyboardShouldPersistTaps="handled"
+				refreshControl={
+					<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
+				}
+				ListFooterComponent={
+					<AddItemCard
+						ref={addItemRef}
+						listId={listId}
+						onInputFocus={scrollToEnd}
+					/>
+				}
+			/>
+		</KeyboardAvoidingView>
 	);
-}
+});

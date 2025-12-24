@@ -1,13 +1,9 @@
 import type { Category } from "@collab-list/shared/types";
-import * as LucideIcons from "lucide-react-native";
 import { Ban, Plus, Search } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
 import { useCategories, useCreateCategory } from "@/api/categories.api";
-import {
-	IconPicker,
-	POPULAR_ICONS,
-} from "@/components/categories/shared/IconPicker";
+import { IconPicker, POPULAR_ICONS } from "@/components/categories/IconPicker";
 import { Button } from "@/components/ui/Button";
 import {
 	Dialog,
@@ -22,18 +18,11 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Text } from "@/components/ui/Text";
 import { useDebounce } from "@/hooks/useDebounce";
+import { MAX_CATEGORY_NAME_LENGTH } from "@/lib/constants";
+import { getCategoryIconWithFallback } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 const DEBOUNCE_MS = 300;
-const MAX_NAME_LENGTH = 255;
-
-function getCategoryIcon(iconName: string): LucideIcons.LucideIcon {
-	const icons = LucideIcons as unknown as Record<
-		string,
-		LucideIcons.LucideIcon
-	>;
-	return icons[iconName] || LucideIcons.FolderOpen;
-}
 
 interface CategorySelectDialogProps {
 	isOpen: boolean;
@@ -168,7 +157,7 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 								value={searchQuery}
 								onChangeText={setSearchQuery}
 								className="flex-1 border-0 bg-transparent px-0 shadow-none"
-								maxLength={MAX_NAME_LENGTH}
+								maxLength={MAX_CATEGORY_NAME_LENGTH}
 							/>
 						</View>
 
@@ -203,7 +192,9 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 								</TouchableOpacity>
 
 								{filteredCategories.map((category) => {
-									const CategoryIconComponent = getCategoryIcon(category.icon);
+									const CategoryIconComponent = getCategoryIconWithFallback(
+										category.icon,
+									);
 									const isSelected = currentCategoryId === category.id;
 
 									return (
@@ -265,7 +256,7 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 										if (nameError) setNameError("");
 									}}
 									editable={!isCreating}
-									maxLength={MAX_NAME_LENGTH}
+									maxLength={MAX_CATEGORY_NAME_LENGTH}
 									autoFocus
 								/>
 								{nameError ? (

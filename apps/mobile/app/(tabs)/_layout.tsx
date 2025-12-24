@@ -1,9 +1,15 @@
 import { Tabs } from "expo-router";
 import { FolderOpen, ListTodo, UserIcon } from "lucide-react-native";
 import { useTheme } from "@/contexts/theme.context";
+import { colors } from "@/lib/theme";
+
+function rgb(color: string): string {
+	return `rgb(${color})`;
+}
 
 export default function TabLayout() {
 	const { theme } = useTheme();
+	const themeColors = colors[theme];
 
 	return (
 		<Tabs
@@ -11,15 +17,14 @@ export default function TabLayout() {
 				headerShown: false,
 				tabBarStyle: {
 					paddingTop: 8,
-					backgroundColor:
-						theme === "dark" ? "rgb(24 24 27)" : "rgb(255 255 255)",
-					borderTopColor:
-						theme === "dark" ? "rgb(39 39 42)" : "rgb(228 228 231)",
+					backgroundColor: rgb(themeColors.card),
+					borderTopColor: rgb(themeColors.border),
 				},
 				tabBarActiveTintColor:
-					theme === "dark" ? "rgb(250 250 250)" : "rgb(24 24 27)",
-				tabBarInactiveTintColor:
-					theme === "dark" ? "rgb(161 161 170)" : "rgb(113 113 122)",
+					theme === "dark"
+						? rgb(themeColors.foreground)
+						: rgb(themeColors.primary),
+				tabBarInactiveTintColor: rgb(themeColors.mutedForeground),
 			}}
 		>
 			<Tabs.Screen

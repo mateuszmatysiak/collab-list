@@ -22,9 +22,8 @@ import {
 import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
 import { useIsListOwner } from "@/hooks/useIsListOwner";
+import { MAX_LIST_NAME_LENGTH } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-
-const MAX_NAME_LENGTH = 500;
 
 interface EditableListNameProps {
 	listName: string;
@@ -88,7 +87,7 @@ function EditableListName(props: EditableListNameProps) {
 				onSubmitEditing={handleSubmitEditing}
 				onBlur={handleBlur}
 				editable={!isUpdating}
-				maxLength={MAX_NAME_LENGTH}
+				maxLength={MAX_LIST_NAME_LENGTH}
 				returnKeyType="done"
 				selectTextOnFocus
 			/>

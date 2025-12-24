@@ -8,8 +8,5 @@ export const queryKeys = {
 	},
 	categories: {
 		all: ["categories"] as const,
-		detail: (id: string) => ["categories", id] as const,
-		items: (categoryId: string) => ["categories", categoryId, "items"] as const,
-		search: (query: string) => ["categories", "search", query] as const,
 	},
 };

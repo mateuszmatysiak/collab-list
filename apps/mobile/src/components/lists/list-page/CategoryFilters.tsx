@@ -1,4 +1,4 @@
-import * as LucideIcons from "lucide-react-native";
+import { Ban } from "lucide-react-native";
 import { useMemo } from "react";
 import { ScrollView, View } from "react-native";
 import { useCategories } from "@/api/categories.api";
@@ -7,17 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
 import { UNCATEGORIZED_FILTER } from "@/lib/constants";
-
-function getCategoryIcon(
-	iconName: string | null,
-): LucideIcons.LucideIcon | null {
-	if (!iconName) return null;
-	const icons = LucideIcons as unknown as Record<
-		string,
-		LucideIcons.LucideIcon
-	>;
-	return icons[iconName] || null;
-}
+import { getCategoryIcon } from "@/lib/icons";
 
 interface CategoryFiltersProps {
 	listId: string;
@@ -101,14 +91,14 @@ export function CategoryFilters(props: CategoryFiltersProps) {
 					);
 				})}
 
-				{hasUncategorizedItems && (
+				{hasUncategorizedItems && availableCategories.length > 0 && (
 					<Button
 						variant={isUncategorizedSelected ? "default" : "outline"}
 						size="sm"
 						onPress={() => onCategoryChange(UNCATEGORIZED_FILTER)}
 					>
 						<Icon
-							as={LucideIcons.Ban}
+							as={Ban}
 							className={
 								isUncategorizedSelected
 									? "text-primary-foreground"

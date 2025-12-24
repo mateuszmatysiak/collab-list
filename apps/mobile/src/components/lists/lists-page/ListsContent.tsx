@@ -25,10 +25,8 @@ const styles = StyleSheet.create({
 	},
 });
 
-const ITEM_SEPARATOR_HEIGHT = 12;
-
 function SeparatorItem() {
-	return <View style={{ height: ITEM_SEPARATOR_HEIGHT }} />;
+	return <View className="h-3" />;
 }
 
 function ListCardRender(props: { item: ListWithDetails }) {
