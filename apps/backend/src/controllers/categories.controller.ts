@@ -7,12 +7,9 @@ import { authMiddleware } from "../middleware/auth";
 import {
 	createLocalCategory,
 	createUserCategory,
-	deleteLocalCategory,
 	deleteUserCategory,
 	getCategoriesForList,
 	getUserCategories,
-	importLocalToOwner,
-	saveLocalToUser,
 	updateUserCategory,
 } from "../services/categories.service";
 import { createJsonValidator, getValidatedJson } from "../utils/validator";
@@ -95,47 +92,3 @@ export const createLocalCategoryController = [
 	},
 ];
 
-export const saveLocalToUserController = [
-	authMiddleware,
-	async (c: Context) => {
-		const userId = c.get("userId");
-		const listId = c.req.param("listId");
-		const categoryId = c.req.param("categoryId");
-
-		const category = await saveLocalToUser(categoryId, listId, userId);
-
-		return c.json({
-			category,
-			message: "Kategoria zapisana do słownika",
-		});
-	},
-];
-
-export const importLocalToOwnerController = [
-	authMiddleware,
-	async (c: Context) => {
-		const userId = c.get("userId");
-		const listId = c.req.param("listId");
-		const categoryId = c.req.param("categoryId");
-
-		const category = await importLocalToOwner(categoryId, listId, userId);
-
-		return c.json({
-			category,
-			message: "Kategoria zaimportowana do słownika",
-		});
-	},
-];
-
-export const deleteLocalCategoryController = [
-	authMiddleware,
-	async (c: Context) => {
-		const userId = c.get("userId");
-		const listId = c.req.param("listId");
-		const categoryId = c.req.param("categoryId");
-
-		await deleteLocalCategory(categoryId, listId, userId);
-
-		return c.json({ message: "Kategoria lokalna usunięta pomyślnie" });
-	},
-];

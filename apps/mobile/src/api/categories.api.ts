@@ -100,58 +100,6 @@ export const useCreateLocalCategory = (listId: string) => {
 	});
 };
 
-export const useSaveLocalToUser = (listId: string) => {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: (categoryId: string) =>
-			apiClient
-				.post<{ category: Category }>(
-					`/api/lists/${listId}/categories/local/${categoryId}/save-to-user`,
-				)
-				.then((res) => res.data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.categories.user });
-		},
-	});
-};
-
-export const useImportLocalToOwner = (listId: string) => {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: (categoryId: string) =>
-			apiClient
-				.post<{ category: Category }>(
-					`/api/lists/${listId}/categories/local/${categoryId}/import-to-owner`,
-				)
-				.then((res) => res.data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.categories.user });
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.categories.list(listId),
-			});
-		},
-	});
-};
-
-export const useDeleteLocalCategory = (listId: string) => {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: (categoryId: string) =>
-			apiClient
-				.delete(`/api/lists/${listId}/categories/local/${categoryId}`)
-				.then((res) => res.data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.categories.list(listId),
-			});
-			queryClient.invalidateQueries({ queryKey: ["lists"] });
-		},
-	});
-};
-
 export const useCategories = useUserCategories;
 export const useCreateCategory = useCreateUserCategory;
 export const useUpdateCategory = useUpdateUserCategory;
