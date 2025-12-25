@@ -234,7 +234,7 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 												</Text>
 												{category.type === "local" && (
 													<Text className="text-xs text-muted-foreground">
-														Lokalna
+														Stworzona przez Gościa tylko dla tej listy
 													</Text>
 												)}
 											</View>
