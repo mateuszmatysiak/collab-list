@@ -1,3 +1,5 @@
+import type { CategoryType } from "./categories.types";
+
 export interface ListItem {
 	id: string;
 	listId: string;
@@ -5,7 +7,9 @@ export interface ListItem {
 	description: string | null;
 	isCompleted: boolean;
 	categoryId: string | null;
+	categoryType: CategoryType | null;
 	categoryIcon: string | null;
+	categoryName: string | null;
 	position: number;
 	createdAt: Date;
 }

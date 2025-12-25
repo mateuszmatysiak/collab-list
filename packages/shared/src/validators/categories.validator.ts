@@ -6,8 +6,8 @@ export const createCategorySchema = z.object({
 });
 
 export const updateCategorySchema = z.object({
-	name: z.string().min(1).max(255),
-	icon: z.string().min(1).max(100),
+	name: z.string().min(1).max(255).optional(),
+	icon: z.string().min(1).max(100).optional(),
 });
 
 export type CreateCategoryRequest = z.infer<typeof createCategorySchema>;
