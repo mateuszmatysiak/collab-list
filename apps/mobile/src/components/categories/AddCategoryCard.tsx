@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
-import { useCreateCategory } from "@/api/categories.api";
+import { useCreateUserCategory } from "@/api/categories.api";
 import { Button } from "@/components/ui/Button";
 import {
 	Dialog,
@@ -33,7 +33,7 @@ export function AddCategoryCard(props: AddCategoryCardProps) {
 	const [icon, setIcon] = useState<string>(POPULAR_ICONS[0]);
 	const [nameError, setNameError] = useState("");
 
-	const { mutate: createCategory, isPending } = useCreateCategory();
+	const { mutate: createCategory, isPending } = useCreateUserCategory();
 
 	function handleCreate() {
 		const trimmedName = name.trim();
@@ -104,7 +104,7 @@ export function AddCategoryCard(props: AddCategoryCardProps) {
 					<DialogHeader>
 						<DialogTitle>Nowa kategoria</DialogTitle>
 						<DialogDescription>
-							Utwórz własną prywatną kategorię produktów.
+							Utwórz własną kategorię w swoim słowniku.
 						</DialogDescription>
 					</DialogHeader>
 

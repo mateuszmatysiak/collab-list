@@ -5,7 +5,7 @@ import {
 	useWindowDimensions,
 	View,
 } from "react-native";
-import { useCategories } from "@/api/categories.api";
+import { useUserCategories } from "@/api/categories.api";
 import { Text } from "@/components/ui/Text";
 import { AddCategoryCard } from "./AddCategoryCard";
 import { CategoryCard } from "./CategoryCard";
@@ -16,7 +16,7 @@ interface CategoryGridProps {
 
 export function CategoryGrid(props: CategoryGridProps) {
 	const { searchQuery } = props;
-	const { data: categories, isLoading, isError } = useCategories();
+	const { data: categories, isLoading, isError } = useUserCategories();
 	const { width } = useWindowDimensions();
 
 	const itemWidth = (width - 40 - 24) / 3;

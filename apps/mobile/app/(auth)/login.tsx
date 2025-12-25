@@ -83,7 +83,7 @@ export default function LoginScreen() {
 								name="email"
 								render={({ field: { onChange, onBlur, value } }) => (
 									<Input
-										placeholder="jan@example.com"
+										placeholder="x@example.com"
 										value={value}
 										onChangeText={onChange}
 										onBlur={onBlur}

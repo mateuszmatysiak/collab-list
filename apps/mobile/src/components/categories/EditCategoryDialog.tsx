@@ -1,7 +1,7 @@
 import type { Category } from "@collab-list/shared/types";
 import { useState } from "react";
 import { Alert, ScrollView, View } from "react-native";
-import { useUpdateCategory } from "@/api/categories.api";
+import { useUpdateUserCategory } from "@/api/categories.api";
 import { Button } from "@/components/ui/Button";
 import {
 	Dialog,
@@ -33,7 +33,9 @@ export function EditCategoryDialog(props: EditCategoryDialogProps) {
 	const [icon, setIcon] = useState(category.icon);
 	const [nameError, setNameError] = useState("");
 
-	const { mutate: updateCategory, isPending } = useUpdateCategory(category.id);
+	const { mutate: updateCategory, isPending } = useUpdateUserCategory(
+		category.id,
+	);
 
 	function handleOpenChange(open: boolean) {
 		if (open) {

@@ -1,7 +1,7 @@
 import { Ban } from "lucide-react-native";
 import { useMemo } from "react";
 import { ScrollView, View } from "react-native";
-import { useCategories } from "@/api/categories.api";
+import { useListCategories } from "@/api/categories.api";
 import { useItems } from "@/api/items.api";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
@@ -19,7 +19,7 @@ export function CategoryFilters(props: CategoryFiltersProps) {
 	const { listId, selectedCategoryId, onCategoryChange } = props;
 
 	const { data: items } = useItems(listId);
-	const { data: allCategories } = useCategories();
+	const { data: allCategories } = useListCategories(listId);
 
 	const availableCategories = useMemo(() => {
 		if (!items || !allCategories) return [];

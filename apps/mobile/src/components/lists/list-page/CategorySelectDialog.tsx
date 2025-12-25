@@ -1,8 +1,11 @@
-import type { Category } from "@collab-list/shared/types";
+import type { ListCategory } from "@collab-list/shared/types";
 import { Ban, Plus, Search } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
-import { useCategories, useCreateCategory } from "@/api/categories.api";
+import {
+	useCreateLocalCategory,
+	useListCategories,
+} from "@/api/categories.api";
 import { IconPicker, POPULAR_ICONS } from "@/components/categories/IconPicker";
 import { Button } from "@/components/ui/Button";
 import {
@@ -25,14 +28,19 @@ import { cn } from "@/lib/utils";
 const DEBOUNCE_MS = 300;
 
 interface CategorySelectDialogProps {
+	listId: string;
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
 	currentCategoryId: string | null;
-	onSelectCategory: (categoryId: string | null) => void;
+	onSelectCategory: (
+		categoryId: string | null,
+		categoryType: "user" | "local" | null,
+	) => void;
 }
 
 export function CategorySelectDialog(props: CategorySelectDialogProps) {
-	const { isOpen, onOpenChange, currentCategoryId, onSelectCategory } = props;
+	const { listId, isOpen, onOpenChange, currentCategoryId, onSelectCategory } =
+		props;
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isCreatingNew, setIsCreatingNew] = useState(false);
@@ -43,8 +51,9 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 	const [nameError, setNameError] = useState("");
 
 	const debouncedQuery = useDebounce(searchQuery.trim(), DEBOUNCE_MS);
-	const { data: categories = [] } = useCategories();
-	const { mutate: createCategory, isPending: isCreating } = useCreateCategory();
+	const { data: categories = [] } = useListCategories(listId);
+	const { mutate: createLocalCategory, isPending: isCreating } =
+		useCreateLocalCategory(listId);
 
 	const filteredCategories = useMemo(() => {
 		if (!debouncedQuery) return categories;
@@ -62,13 +71,13 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 	const showCreateOption =
 		debouncedQuery.length > 0 && !hasExactMatch && !isCreatingNew;
 
-	function handleSelectCategory(category: Category) {
-		onSelectCategory(category.id);
+	function handleSelectCategory(category: ListCategory) {
+		onSelectCategory(category.id, category.type);
 		handleClose();
 	}
 
 	function handleRemoveCategory() {
-		onSelectCategory(null);
+		onSelectCategory(null, null);
 		handleClose();
 	}
 
@@ -96,11 +105,11 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 
 		setNameError("");
 
-		createCategory(
+		createLocalCategory(
 			{ name: trimmedName, icon: newCategoryIcon },
 			{
 				onSuccess: (data) => {
-					onSelectCategory(data.category.id);
+					onSelectCategory(data.category.id, data.category.type);
 					handleClose();
 				},
 				onError: () => {
@@ -214,14 +223,21 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 													size={16}
 												/>
 											</View>
-											<Text
-												className={cn(
-													"flex-1 text-sm",
-													isSelected && "font-medium text-primary",
+											<View className="flex-1">
+												<Text
+													className={cn(
+														"text-sm",
+														isSelected && "font-medium text-primary",
+													)}
+												>
+													{category.name}
+												</Text>
+												{category.type === "local" && (
+													<Text className="text-xs text-muted-foreground">
+														Lokalna
+													</Text>
 												)}
-											>
-												{category.name}
-											</Text>
+											</View>
 										</TouchableOpacity>
 									);
 								})}

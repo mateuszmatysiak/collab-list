@@ -7,6 +7,7 @@ export const queryKeys = {
 		shares: (listId: string) => ["lists", listId, "shares"] as const,
 	},
 	categories: {
-		all: ["categories"] as const,
+		user: ["categories", "user"] as const,
+		list: (listId: string) => ["categories", "list", listId] as const,
 	},
 };

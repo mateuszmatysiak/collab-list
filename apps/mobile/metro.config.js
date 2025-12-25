@@ -4,7 +4,6 @@ const { withNativeWind } = require("nativewind/metro");
 
 const config = getDefaultConfig(__dirname);
 
-// Configure path aliases
 config.resolver = {
 	...config.resolver,
 	alias: {

@@ -1,6 +1,6 @@
 import type { Category } from "@collab-list/shared/types";
 import { Alert } from "react-native";
-import { useDeleteCategory } from "@/api/categories.api";
+import { useDeleteUserCategory } from "@/api/categories.api";
 import { Button } from "@/components/ui/Button";
 import {
 	Dialog,
@@ -21,7 +21,9 @@ interface DeleteCategoryDialogProps {
 export function DeleteCategoryDialog(props: DeleteCategoryDialogProps) {
 	const { category, isOpen, onOpenChange } = props;
 
-	const { mutate: deleteCategory, isPending } = useDeleteCategory(category.id);
+	const { mutate: deleteCategory, isPending } = useDeleteUserCategory(
+		category.id,
+	);
 
 	function handleDelete() {
 		deleteCategory(undefined, {

@@ -1,4 +1,4 @@
-import type { ListItem } from "@collab-list/shared/types";
+import type { CategoryType, ListItem } from "@collab-list/shared/types";
 import { Ban, GripVertical, X } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, View } from "react-native";
@@ -78,9 +78,12 @@ export function ListItemCard(props: ListItemCardProps) {
 		setIsEditingDescription(false);
 	}
 
-	function handleCategorySelect(categoryId: string | null) {
+	function handleCategorySelect(
+		categoryId: string | null,
+		categoryType: CategoryType | null,
+	) {
 		updateItem(
-			{ categoryId },
+			{ categoryId, categoryType },
 			{
 				onError: () => {
 					Alert.alert("Błąd", "Nie udało się zaktualizować kategorii.");
@@ -204,6 +207,7 @@ export function ListItemCard(props: ListItemCardProps) {
 			</Pressable>
 
 			<CategorySelectDialog
+				listId={listId}
 				isOpen={isCategoryDialogOpen}
 				onOpenChange={setIsCategoryDialogOpen}
 				currentCategoryId={item.categoryId}
