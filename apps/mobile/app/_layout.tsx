@@ -4,13 +4,13 @@ import { Slot } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "@/contexts/auth.context";
 import { ThemeProvider } from "@/contexts/theme.context";
-import { QUERY_STALE_TIME_MS } from "@/lib/constants";
+import { QUERY_RETRY_COUNT, QUERY_STALE_TIME_MS } from "@/lib/constants";
 import "../global.css";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
-			retry: 2,
+			retry: QUERY_RETRY_COUNT,
 			staleTime: QUERY_STALE_TIME_MS,
 		},
 	},

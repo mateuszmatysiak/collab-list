@@ -16,6 +16,7 @@ interface CategoryGridProps {
 
 export function CategoryGrid(props: CategoryGridProps) {
 	const { searchQuery } = props;
+
 	const { data: categories, isLoading, isError } = useUserCategories();
 	const { width } = useWindowDimensions();
 

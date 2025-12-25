@@ -26,7 +26,7 @@ function DialogOverlay(
 		<FullWindowOverlay>
 			<DialogPrimitive.Overlay
 				className={cn(
-					"absolute bottom-0 left-0 right-0 top-0 flex justify-center bg-black/50 p-4",
+					"absolute bottom-0 left-0 right-0 top-0 bg-black/50 p-4",
 					Platform.select({
 						web: "animate-in fade-in-0 fixed cursor-default [&>*]:cursor-auto",
 					}),
@@ -53,7 +53,7 @@ function DialogContent(
 	return (
 		<DialogPortal hostName={portalHost}>
 			<DialogOverlay>
-				<View className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center p-4">
+				<View className="absolute bottom-0 left-0 right-0 top-0 pt-[20%]">
 					<DialogPrimitive.Content
 						className={cn(
 							"bg-background border-border z-50 flex w-full flex-col gap-4 rounded-lg border p-6 shadow-lg shadow-black/5",

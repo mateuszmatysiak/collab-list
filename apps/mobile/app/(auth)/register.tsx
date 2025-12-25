@@ -40,7 +40,7 @@ export default function RegisterScreen() {
 
 		try {
 			await register(data.name, data.email, data.password);
-			router.replace("/(tabs)");
+			router.replace("/(tabs)/lists");
 		} catch (err) {
 			const axiosError = err as AxiosError<ApiErrorResponse>;
 			const message =

@@ -14,8 +14,9 @@ import { formatDate, getInitials } from "@/lib/utils";
 
 export default function ProfileScreen() {
 	const { user } = useAuth();
-	const { data: lists } = useLists();
 	const { theme, toggleTheme } = useTheme();
+
+	const { data: lists } = useLists();
 
 	if (!user) {
 		return (
@@ -126,12 +127,7 @@ export default function ProfileScreen() {
 										</Text>
 									</View>
 								</View>
-								<Switch
-									value={theme === "dark"}
-									onValueChange={() => {
-										void toggleTheme();
-									}}
-								/>
+								<Switch value={theme === "dark"} onValueChange={toggleTheme} />
 							</View>
 						</CardContent>
 					</Card>
