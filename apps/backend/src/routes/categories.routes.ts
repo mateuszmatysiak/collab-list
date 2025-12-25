@@ -1,16 +1,16 @@
 import { Hono } from "hono";
 import {
-	createCategoryController,
-	deleteCategoryController,
-	getCategoriesController,
-	updateCategoryController,
+	createUserCategoryController,
+	deleteUserCategoryController,
+	getUserCategoriesController,
+	updateUserCategoryController,
 } from "../controllers/categories.controller";
 
 const categoriesRoutes = new Hono();
 
-categoriesRoutes.get("/", ...getCategoriesController);
-categoriesRoutes.post("/", ...createCategoryController);
-categoriesRoutes.patch("/:id", ...updateCategoryController);
-categoriesRoutes.delete("/:id", ...deleteCategoryController);
+categoriesRoutes.get("/user", ...getUserCategoriesController);
+categoriesRoutes.post("/user", ...createUserCategoryController);
+categoriesRoutes.patch("/:id", ...updateUserCategoryController);
+categoriesRoutes.delete("/:id", ...deleteUserCategoryController);
 
 export default categoriesRoutes;

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db/index";
-import { users } from "../db/schema";
+import { systemCategories, userCategories, users } from "../db/schema";
 import {
 	AppError,
 	ConflictError,
@@ -8,6 +8,23 @@ import {
 	UnauthorizedError,
 } from "../utils/errors";
 import { hashPassword, verifyPassword } from "../utils/password";
+
+async function copySystemCategoriesToUser(userId: string) {
+	const systemCats = await db.select().from(systemCategories);
+
+	if (systemCats.length === 0) {
+		return;
+	}
+
+	await db.insert(userCategories).values(
+		systemCats.map((cat) => ({
+			userId,
+			name: cat.name,
+			icon: cat.icon,
+			listId: null,
+		})),
+	);
+}
 
 export async function createUser(
 	name: string,
@@ -42,6 +59,8 @@ export async function createUser(
 			"CREATE_ERROR",
 		);
 	}
+
+	await copySystemCategoriesToUser(user.id);
 
 	return user;
 }

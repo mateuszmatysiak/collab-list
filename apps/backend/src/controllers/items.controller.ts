@@ -32,7 +32,7 @@ export const createItemController = [
 	async (c: Context) => {
 		const userId = c.get("userId");
 		const listId = c.req.param("listId");
-		const { title, description, categoryId } = getValidatedJson(
+		const { title, description, categoryId, categoryType } = getValidatedJson(
 			c,
 			createItemSchema,
 		);
@@ -43,6 +43,7 @@ export const createItemController = [
 			title,
 			description,
 			categoryId,
+			categoryType,
 		);
 
 		return c.json({ item }, 201);

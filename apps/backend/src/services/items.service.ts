@@ -1,7 +1,12 @@
 import { and, eq, inArray, max } from "drizzle-orm";
 import { db } from "../db/index";
-import { categories, listItems } from "../db/schema";
-import { ForbiddenError, NotFoundError } from "../utils/errors";
+import { listItems, userCategories } from "../db/schema";
+import {
+	ForbiddenError,
+	NotFoundError,
+	ValidationError,
+} from "../utils/errors";
+import { validateCategoryForList } from "./categories.service";
 import { checkListAccess } from "./lists.service";
 
 export async function getItems(listId: string, userId: string) {
@@ -19,12 +24,14 @@ export async function getItems(listId: string, userId: string) {
 			description: listItems.description,
 			isCompleted: listItems.isCompleted,
 			categoryId: listItems.categoryId,
-			categoryIcon: categories.icon,
+			categoryType: listItems.categoryType,
+			categoryIcon: userCategories.icon,
+			categoryName: userCategories.name,
 			position: listItems.position,
 			createdAt: listItems.createdAt,
 		})
 		.from(listItems)
-		.leftJoin(categories, eq(listItems.categoryId, categories.id))
+		.leftJoin(userCategories, eq(listItems.categoryId, userCategories.id))
 		.where(eq(listItems.listId, listId))
 		.orderBy(listItems.position);
 
@@ -35,7 +42,9 @@ export async function getItems(listId: string, userId: string) {
 		description: item.description,
 		isCompleted: item.isCompleted,
 		categoryId: item.categoryId,
+		categoryType: item.categoryType,
 		categoryIcon: item.categoryIcon ?? null,
+		categoryName: item.categoryName ?? null,
 		position: item.position,
 		createdAt: item.createdAt,
 	}));
@@ -47,6 +56,7 @@ export async function createItem(
 	title: string,
 	description?: string,
 	categoryId?: string | null,
+	categoryType?: "user" | "local" | null,
 ) {
 	const access = await checkListAccess(listId, userId);
 
@@ -58,6 +68,17 @@ export async function createItem(
 		throw new ForbiddenError(
 			"Nie masz uprawnień do dodawania elementów do tej listy",
 		);
+	}
+
+	if (categoryId && categoryType) {
+		const isValid = await validateCategoryForList(
+			categoryId,
+			categoryType,
+			listId,
+		);
+		if (!isValid) {
+			throw new ValidationError("Nieprawidłowa kategoria dla tej listy");
+		}
 	}
 
 	const [maxPositionResult] = await db
@@ -75,6 +96,7 @@ export async function createItem(
 			description,
 			isCompleted: false,
 			categoryId: categoryId || null,
+			categoryType: categoryId && categoryType ? categoryType : null,
 			position: nextPosition,
 		})
 		.returning();
@@ -91,12 +113,14 @@ export async function createItem(
 			description: listItems.description,
 			isCompleted: listItems.isCompleted,
 			categoryId: listItems.categoryId,
-			categoryIcon: categories.icon,
+			categoryType: listItems.categoryType,
+			categoryIcon: userCategories.icon,
+			categoryName: userCategories.name,
 			position: listItems.position,
 			createdAt: listItems.createdAt,
 		})
 		.from(listItems)
-		.leftJoin(categories, eq(listItems.categoryId, categories.id))
+		.leftJoin(userCategories, eq(listItems.categoryId, userCategories.id))
 		.where(eq(listItems.id, item.id))
 		.limit(1);
 
@@ -111,7 +135,9 @@ export async function createItem(
 		description: itemWithCategory.description,
 		isCompleted: itemWithCategory.isCompleted,
 		categoryId: itemWithCategory.categoryId,
+		categoryType: itemWithCategory.categoryType,
 		categoryIcon: itemWithCategory.categoryIcon ?? null,
+		categoryName: itemWithCategory.categoryName ?? null,
 		position: itemWithCategory.position,
 		createdAt: itemWithCategory.createdAt,
 	};
@@ -126,6 +152,7 @@ export async function updateItem(
 		description?: string;
 		is_completed?: boolean;
 		categoryId?: string | null;
+		categoryType?: "user" | "local" | null;
 	},
 ) {
 	const access = await checkListAccess(listId, userId);
@@ -154,11 +181,26 @@ export async function updateItem(
 		throw new NotFoundError("Element nie należy do tej listy");
 	}
 
+	if (data.categoryId !== undefined && data.categoryId !== null) {
+		const categoryType = data.categoryType ?? item.categoryType;
+		if (categoryType) {
+			const isValid = await validateCategoryForList(
+				data.categoryId,
+				categoryType,
+				listId,
+			);
+			if (!isValid) {
+				throw new ValidationError("Nieprawidłowa kategoria dla tej listy");
+			}
+		}
+	}
+
 	const updateData: {
 		title?: string;
 		description?: string;
 		isCompleted?: boolean;
 		categoryId?: string | null;
+		categoryType?: "user" | "local" | null;
 	} = {};
 
 	if (data.title !== undefined) {
@@ -175,6 +217,11 @@ export async function updateItem(
 
 	if (data.categoryId !== undefined) {
 		updateData.categoryId = data.categoryId || null;
+		if (!data.categoryId) {
+			updateData.categoryType = null;
+		} else if (data.categoryType !== undefined) {
+			updateData.categoryType = data.categoryType;
+		}
 	}
 
 	await db.update(listItems).set(updateData).where(eq(listItems.id, itemId));
@@ -187,12 +234,14 @@ export async function updateItem(
 			description: listItems.description,
 			isCompleted: listItems.isCompleted,
 			categoryId: listItems.categoryId,
-			categoryIcon: categories.icon,
+			categoryType: listItems.categoryType,
+			categoryIcon: userCategories.icon,
+			categoryName: userCategories.name,
 			position: listItems.position,
 			createdAt: listItems.createdAt,
 		})
 		.from(listItems)
-		.leftJoin(categories, eq(listItems.categoryId, categories.id))
+		.leftJoin(userCategories, eq(listItems.categoryId, userCategories.id))
 		.where(eq(listItems.id, itemId))
 		.limit(1);
 
@@ -207,7 +256,9 @@ export async function updateItem(
 		description: itemWithCategory.description,
 		isCompleted: itemWithCategory.isCompleted,
 		categoryId: itemWithCategory.categoryId,
+		categoryType: itemWithCategory.categoryType,
 		categoryIcon: itemWithCategory.categoryIcon ?? null,
+		categoryName: itemWithCategory.categoryName ?? null,
 		position: itemWithCategory.position,
 		createdAt: itemWithCategory.createdAt,
 	};

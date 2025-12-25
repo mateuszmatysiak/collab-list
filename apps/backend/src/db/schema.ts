@@ -11,6 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum("role", ["owner", "editor"]);
+export const categoryTypeEnum = pgEnum("category_type", ["user", "local"]);
 
 export const users = pgTable(
 	"users",
@@ -37,12 +38,31 @@ export const lists = pgTable(
 	(table) => [index("lists_author_id_idx").on(table.authorId)],
 );
 
-export const categories = pgTable("categories", {
+export const systemCategories = pgTable("system_categories", {
 	id: uuid("id").defaultRandom().primaryKey(),
 	name: varchar("name", { length: 255 }).notNull(),
 	icon: varchar("icon", { length: 100 }).notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const userCategories = pgTable(
+	"user_categories",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		userId: uuid("user_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		name: varchar("name", { length: 255 }).notNull(),
+		icon: varchar("icon", { length: 100 }).notNull(),
+		listId: uuid("list_id").references(() => lists.id, { onDelete: "cascade" }),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => [
+		index("user_categories_user_id_idx").on(table.userId),
+		index("user_categories_list_id_idx").on(table.listId),
+		index("user_categories_user_list_idx").on(table.userId, table.listId),
+	],
+);
 
 export const listItems = pgTable(
 	"list_items",
@@ -54,15 +74,20 @@ export const listItems = pgTable(
 		title: varchar("title", { length: 1000 }).notNull(),
 		description: varchar("description", { length: 2000 }),
 		isCompleted: boolean("is_completed").default(false).notNull(),
-		categoryId: uuid("category_id").references(() => categories.id, {
+		categoryId: uuid("category_id").references(() => userCategories.id, {
 			onDelete: "set null",
 		}),
+		categoryType: categoryTypeEnum("category_type"),
 		position: integer("position").default(0).notNull(),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 	},
 	(table) => [
 		index("list_items_list_id_idx").on(table.listId),
 		index("list_items_category_id_idx").on(table.categoryId),
+		index("list_items_category_type_idx").on(
+			table.categoryId,
+			table.categoryType,
+		),
 	],
 );
 
