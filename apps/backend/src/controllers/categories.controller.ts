@@ -91,4 +91,3 @@ export const createLocalCategoryController = [
 		return c.json({ category }, 201);
 	},
 ];
-

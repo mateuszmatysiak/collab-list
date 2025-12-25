@@ -1,7 +1,7 @@
 import { and, eq, isNull, or } from "drizzle-orm";
 import { db } from "../db/index";
 import { lists, userCategories } from "../db/schema";
-import { ConflictError, ForbiddenError, NotFoundError } from "../utils/errors";
+import { ConflictError, NotFoundError } from "../utils/errors";
 import { checkListAccess } from "./lists.service";
 
 export async function getUserCategories(userId: string) {
@@ -271,7 +271,6 @@ export async function deleteUserCategory(categoryId: string, userId: string) {
 
 	await db.delete(userCategories).where(eq(userCategories.id, categoryId));
 }
-
 
 export async function validateCategoryForList(
 	categoryId: string,
