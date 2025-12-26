@@ -49,20 +49,6 @@ function CardTitle(props: CardTitleProps) {
 	);
 }
 
-type CardDescriptionProps = React.ComponentProps<typeof Text> &
-	React.RefAttributes<Text>;
-
-function CardDescription(props: CardDescriptionProps) {
-	const { className, ...restProps } = props;
-
-	return (
-		<Text
-			className={cn("text-muted-foreground text-sm", className)}
-			{...restProps}
-		/>
-	);
-}
-
 type CardContentProps = ViewProps & React.RefAttributes<View>;
 
 function CardContent(props: CardContentProps) {
@@ -71,24 +57,4 @@ function CardContent(props: CardContentProps) {
 	return <View className={cn("px-6", className)} {...restProps} />;
 }
 
-type CardFooterProps = ViewProps & React.RefAttributes<View>;
-
-function CardFooter(props: CardFooterProps) {
-	const { className, ...restProps } = props;
-
-	return (
-		<View
-			className={cn("flex flex-row items-center px-6", className)}
-			{...restProps}
-		/>
-	);
-}
-
-export {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-};
+export { Card, CardContent, CardHeader, CardTitle };

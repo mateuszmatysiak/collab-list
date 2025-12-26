@@ -18,20 +18,6 @@ function Avatar(
 	);
 }
 
-function AvatarImage(
-	props: AvatarPrimitive.ImageProps &
-		React.RefAttributes<AvatarPrimitive.ImageRef>,
-) {
-	const { className, ...restProps } = props;
-
-	return (
-		<AvatarPrimitive.Image
-			className={cn("aspect-square size-full", className)}
-			{...restProps}
-		/>
-	);
-}
-
 function AvatarFallback(
 	props: AvatarPrimitive.FallbackProps &
 		React.RefAttributes<AvatarPrimitive.FallbackRef>,
@@ -49,4 +35,4 @@ function AvatarFallback(
 	);
 }
 
-export { Avatar, AvatarFallback, AvatarImage };
+export { Avatar, AvatarFallback };
