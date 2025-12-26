@@ -1,30 +1,22 @@
 import type {
 	ListShareUser,
 	ListWithDetails,
-	SharesResponse,
+	SharesAuthor,
+	ShareWithUser,
 } from "@collab-list/shared/types";
 import type { ShareListRequest } from "@collab-list/shared/validators";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "./client";
 import { queryKeys } from "./queryKeys";
 
-interface ShareListResponse {
-	share: {
-		id: string;
-		listId: string;
-		userId: string;
-		role: string;
-		createdAt: string;
-		userName: string;
-	};
-}
-
 export const useShares = (listId: string) => {
 	return useQuery({
 		queryKey: queryKeys.lists.shares(listId),
 		queryFn: () =>
 			apiClient
-				.get<SharesResponse>(`/api/lists/${listId}/shares`)
+				.get<{ shares: ShareWithUser[]; author: SharesAuthor }>(
+					`/api/lists/${listId}/shares`,
+				)
 				.then((res) => res.data),
 	});
 };
@@ -35,7 +27,7 @@ export const useShareList = (listId: string) => {
 	return useMutation({
 		mutationFn: (data: ShareListRequest) =>
 			apiClient
-				.post<ShareListResponse>(`/api/lists/${listId}/share`, data)
+				.post(`/api/lists/${listId}/share`, data)
 				.then((res) => res.data),
 		onSuccess: (data) => {
 			const newShareUser: ListShareUser = {
