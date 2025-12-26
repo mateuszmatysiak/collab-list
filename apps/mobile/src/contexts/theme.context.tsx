@@ -1,9 +1,11 @@
 import { useColorScheme, vars } from "nativewind";
 import {
 	createContext,
+	type PropsWithChildren,
 	useCallback,
 	useContext,
 	useEffect,
+	useMemo,
 	useState,
 } from "react";
 import { View } from "react-native";
@@ -45,7 +47,9 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider(props: PropsWithChildren) {
+	const { children } = props;
+
 	const [theme, setThemeState] = useState<Theme>("light");
 	const [isLoading, setIsLoading] = useState(true);
 
@@ -66,11 +70,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 		loadTheme();
 	}, [setColorScheme]);
 
-	useEffect(() => {
-		if (theme && !isLoading) {
-			setColorScheme(theme);
-		}
-	}, [theme, isLoading, setColorScheme]);
+	useEffect(
+		function updateColorScheme() {
+			if (theme && !isLoading) {
+				setColorScheme(theme);
+			}
+		},
+		[theme, isLoading, setColorScheme],
+	);
 
 	const updateTheme = useCallback(async (newTheme: Theme) => {
 		try {
@@ -86,11 +93,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 		await updateTheme(newTheme);
 	}, [theme, updateTheme]);
 
-	const value: ThemeContextType = {
-		theme,
-		toggleTheme,
-		setTheme: updateTheme,
-	};
+	const memoizedValue: ThemeContextType = useMemo(
+		() => ({
+			theme,
+			toggleTheme,
+			setTheme: updateTheme,
+		}),
+		[theme, toggleTheme, updateTheme],
+	);
 
 	if (isLoading) {
 		return (
@@ -101,7 +111,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	}
 
 	return (
-		<ThemeContext.Provider value={value}>
+		<ThemeContext.Provider value={memoizedValue}>
 			<View style={[{ flex: 1 }, theme === "dark" ? darkTheme : lightTheme]}>
 				{children}
 			</View>

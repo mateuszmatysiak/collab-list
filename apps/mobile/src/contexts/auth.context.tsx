@@ -1,18 +1,18 @@
+import type { User } from "@collab-list/shared/types";
 import type {
 	LoginRequest,
 	RegisterRequest,
 } from "@collab-list/shared/validators";
 import { useQueryClient } from "@tanstack/react-query";
-import { createContext, useCallback, useContext } from "react";
+import {
+	createContext,
+	type PropsWithChildren,
+	useCallback,
+	useContext,
+	useMemo,
+} from "react";
 import { useLogin, useLogout, useMe, useRegister } from "@/api/auth.api";
 import { clearTokens, getRefreshToken, setTokens } from "@/lib/storage";
-
-interface User {
-	id: string;
-	name: string;
-	email: string;
-	createdAt: string;
-}
 
 interface AuthContextType {
 	user: User | null;
@@ -26,7 +26,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider(props: PropsWithChildren) {
+	const { children } = props;
+
 	const loginMutation = useLogin();
 	const registerMutation = useRegister();
 	const logoutMutation = useLogout();
@@ -73,17 +75,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		await refetch();
 	}, [refetch]);
 
-	const value: AuthContextType = {
-		user: meData?.user ?? null,
-		isLoading: isMeLoading,
-		isAuthenticated: meData?.user != null,
-		login,
-		register,
-		logout,
-		refetchUser,
-	};
+	const memoizedValue: AuthContextType = useMemo(
+		() => ({
+			user: meData?.user ?? null,
+			isLoading: isMeLoading,
+			isAuthenticated: meData?.user != null,
+			login,
+			register,
+			logout,
+			refetchUser,
+		}),
+		[meData?.user, isMeLoading, login, register, logout, refetchUser],
+	);
 
-	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+	return (
+		<AuthContext.Provider value={memoizedValue}>
+			{children}
+		</AuthContext.Provider>
+	);
 }
 
 export function useAuth() {
