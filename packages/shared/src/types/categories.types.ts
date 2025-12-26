@@ -1,8 +1,4 @@
-export const CategoryType = {
-	USER: "user",
-	LOCAL: "local",
-} as const;
-export type CategoryType = (typeof CategoryType)[keyof typeof CategoryType];
+export type CategoryType = "user" | "local";
 
 export interface UserCategory {
 	id: string;
@@ -19,6 +15,8 @@ export interface ListCategory {
 	icon: string;
 	type: CategoryType;
 	isOwner: boolean;
+	hasInDictionary?: boolean;
+	authorName?: string;
 }
 
 export interface Category {

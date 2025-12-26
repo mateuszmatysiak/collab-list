@@ -6,7 +6,7 @@ export const createItemSchema = z
 	.object({
 		title: z.string().max(1000),
 		description: z.string().max(2000).optional(),
-		categoryId: z.string().uuid().nullable().optional(),
+		categoryId: z.uuid().nullable().optional(),
 		categoryType: categoryTypeSchema.nullable().optional(),
 	})
 	.refine(
@@ -25,7 +25,7 @@ export const updateItemSchema = z
 		title: z.string().min(1).max(1000).optional(),
 		description: z.string().max(2000).optional(),
 		is_completed: z.boolean().optional(),
-		categoryId: z.string().uuid().nullable().optional(),
+		categoryId: z.uuid().nullable().optional(),
 		categoryType: categoryTypeSchema.nullable().optional(),
 	})
 	.refine(
@@ -42,7 +42,7 @@ export const updateItemSchema = z
 	);
 
 export const reorderItemsSchema = z.object({
-	itemIds: z.array(z.string().uuid()).min(1),
+	itemIds: z.array(z.uuid()).min(1),
 });
 
 export type CreateItemRequest = z.infer<typeof createItemSchema>;
