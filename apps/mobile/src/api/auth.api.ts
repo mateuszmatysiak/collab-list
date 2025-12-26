@@ -21,13 +21,6 @@ export function useRegister() {
 	});
 }
 
-export function useRefresh() {
-	return useMutation({
-		mutationFn: (data: RefreshTokenRequest) =>
-			apiClient.post("/api/auth/refresh", data).then((res) => res.data),
-	});
-}
-
 export function useLogout() {
 	return useMutation({
 		mutationFn: (data: RefreshTokenRequest) =>

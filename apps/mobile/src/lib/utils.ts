@@ -32,9 +32,10 @@ export function getInitials(name: string): string {
 	return `${firstInitial}${lastInitial}`;
 }
 
-export function formatDate(dateString: string): string {
-	const date = new Date(dateString);
-	return date.toLocaleDateString("pl-PL", {
+export function formatDate(date: string | Date): string {
+	const dateInstance = date instanceof Date ? date : new Date(date);
+
+	return dateInstance.toLocaleDateString("pl-PL", {
 		year: "numeric",
 		month: "long",
 		day: "numeric",

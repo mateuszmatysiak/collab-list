@@ -42,5 +42,3 @@ export const colors = {
 		ring: "212 212 216",
 	},
 } as const;
-
-export type ThemeColors = typeof colors.light;

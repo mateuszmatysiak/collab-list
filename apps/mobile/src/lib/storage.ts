@@ -49,22 +49,6 @@ export async function clearTokens(): Promise<void> {
 	}
 }
 
-export async function getStoredTokens(): Promise<{
-	accessToken: string | null;
-	refreshToken: string | null;
-}> {
-	try {
-		const [accessToken, refreshToken] = await Promise.all([
-			getAccessToken(),
-			getRefreshToken(),
-		]);
-		return { accessToken, refreshToken };
-	} catch (error) {
-		console.error("Error getting stored tokens:", error);
-		return { accessToken: null, refreshToken: null };
-	}
-}
-
 export type Theme = "light" | "dark";
 
 export async function getTheme(): Promise<Theme> {
