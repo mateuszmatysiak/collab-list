@@ -1,3 +1,4 @@
+import type { Category } from "@collab-list/shared/types";
 import { useMemo } from "react";
 import {
 	ActivityIndicator,
@@ -9,6 +10,8 @@ import { useUserCategories } from "@/api/categories.api";
 import { Text } from "@/components/ui/Text";
 import { AddCategoryCard } from "./AddCategoryCard";
 import { CategoryCard } from "./CategoryCard";
+
+type GridItem = { type: "category"; data: Category } | { type: "add" };
 
 interface CategoryGridProps {
 	searchQuery: string;
@@ -32,16 +35,12 @@ export function CategoryGrid(props: CategoryGridProps) {
 		);
 	}, [categories, searchQuery]);
 
-	type GridItem =
-		| { type: "category"; data: (typeof filteredCategories)[number] }
-		| { type: "add" };
-
 	const gridItems: GridItem[] = useMemo(() => {
 		const items: GridItem[] = filteredCategories.map((category) => ({
-			type: "category" as const,
+			type: "category",
 			data: category,
 		}));
-		items.push({ type: "add" as const });
+		items.push({ type: "add" });
 		return items;
 	}, [filteredCategories]);
 

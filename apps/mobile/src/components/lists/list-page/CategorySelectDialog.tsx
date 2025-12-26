@@ -1,11 +1,15 @@
-import type { ListCategory } from "@collab-list/shared/types";
+import type { CategoryType, ListCategory } from "@collab-list/shared/types";
 import { Ban, Plus, Search } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
 import {
 	useCreateLocalCategory,
+	useDeleteLocalCategory,
+	useImportLocalToOwner,
 	useListCategories,
+	useSaveLocalToUser,
 } from "@/api/categories.api";
+import { useList } from "@/api/lists.api";
 import { IconPicker, POPULAR_ICONS } from "@/components/categories/IconPicker";
 import { Button } from "@/components/ui/Button";
 import {
@@ -21,8 +25,9 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Text } from "@/components/ui/Text";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useIsListOwner } from "@/hooks/useIsListOwner";
 import { MAX_CATEGORY_NAME_LENGTH } from "@/lib/constants";
-import { getCategoryIconWithFallback } from "@/lib/icons";
+import { getCategoryIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 const DEBOUNCE_MS = 300;
@@ -34,7 +39,7 @@ interface CategorySelectDialogProps {
 	currentCategoryId: string | null;
 	onSelectCategory: (
 		categoryId: string | null,
-		categoryType: "user" | "local" | null,
+		categoryType: CategoryType | null,
 	) => void;
 }
 
@@ -49,11 +54,19 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 		POPULAR_ICONS[0],
 	);
 	const [nameError, setNameError] = useState("");
+	const [actionDialogCategory, setActionDialogCategory] =
+		useState<ListCategory | null>(null);
 
 	const debouncedQuery = useDebounce(searchQuery.trim(), DEBOUNCE_MS);
 	const { data: categories = [] } = useListCategories(listId);
+	const { data: list } = useList(listId);
+	const isOwner = useIsListOwner(list ?? { authorId: "" });
+
 	const { mutate: createLocalCategory, isPending: isCreating } =
 		useCreateLocalCategory(listId);
+	const { mutate: saveLocalToUser } = useSaveLocalToUser(listId);
+	const { mutate: importLocalToOwner } = useImportLocalToOwner(listId);
+	const { mutate: deleteLocalCategory } = useDeleteLocalCategory(listId);
 
 	const filteredCategories = useMemo(() => {
 		if (!debouncedQuery) return categories;
@@ -74,6 +87,69 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 	function handleSelectCategory(category: ListCategory) {
 		onSelectCategory(category.id, category.type);
 		handleClose();
+	}
+
+	function handleLongPressCategory(category: ListCategory) {
+		setActionDialogCategory(category);
+	}
+
+	function handleCloseActionDialog() {
+		setActionDialogCategory(null);
+	}
+
+	function handleAddToDictionary() {
+		if (!actionDialogCategory) return;
+
+		const category = actionDialogCategory;
+
+		if (isOwner) {
+			importLocalToOwner(category.id, {
+				onSuccess: () => {
+					handleCloseActionDialog();
+				},
+				onError: () => {
+					Alert.alert("Błąd", "Nie udało się dodać kategorii do słownika.");
+				},
+			});
+		} else {
+			saveLocalToUser(category.id, {
+				onSuccess: () => {
+					handleCloseActionDialog();
+				},
+				onError: () => {
+					Alert.alert("Błąd", "Nie udało się dodać kategorii do słownika.");
+				},
+			});
+		}
+	}
+
+	function handleDeleteLocal() {
+		if (!actionDialogCategory) return;
+
+		Alert.alert(
+			"Usuń kategorię",
+			`Czy na pewno chcesz usunąć kategorię "${actionDialogCategory.name}"?`,
+			[
+				{
+					text: "Anuluj",
+					style: "cancel",
+				},
+				{
+					text: "Usuń",
+					style: "destructive",
+					onPress: () => {
+						deleteLocalCategory(actionDialogCategory.id, {
+							onSuccess: () => {
+								handleCloseActionDialog();
+							},
+							onError: () => {
+								Alert.alert("Błąd", "Nie udało się usunąć kategorii.");
+							},
+						});
+					},
+				},
+			],
+		);
 	}
 
 	function handleRemoveCategory() {
@@ -201,15 +277,20 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 								</TouchableOpacity>
 
 								{filteredCategories.map((category) => {
-									const CategoryIconComponent = getCategoryIconWithFallback(
-										category.icon,
-									);
+									const CategoryIconComponent = getCategoryIcon(category.icon);
 									const isSelected = currentCategoryId === category.id;
+									const canShowActions = category.type === "local";
 
 									return (
 										<TouchableOpacity
 											key={category.id}
 											onPress={() => handleSelectCategory(category)}
+											onLongPress={() => {
+												if (canShowActions) {
+													handleLongPressCategory(category);
+												}
+											}}
+											delayLongPress={300}
 											activeOpacity={0.7}
 											className={cn(
 												"flex-row items-center gap-3 rounded-lg px-3 py-2.5",
@@ -234,9 +315,17 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 												</Text>
 												{category.type === "local" && (
 													<Text className="text-xs text-muted-foreground">
-														Stworzona przez Gościa tylko dla tej listy
+														{category.authorName
+															? `Stworzona przez ${category.authorName}`
+															: "Stworzona przez Gościa"}
 													</Text>
 												)}
+												{category.type === "local" &&
+													category.hasInDictionary && (
+														<Text className="text-xs text-primary">
+															Masz już tę kategorię w swoim słowniku
+														</Text>
+													)}
 											</View>
 										</TouchableOpacity>
 									);
@@ -315,6 +404,42 @@ export function CategorySelectDialog(props: CategorySelectDialogProps) {
 					)}
 				</DialogFooter>
 			</DialogContent>
+
+			{actionDialogCategory && (
+				<Dialog
+					open={!!actionDialogCategory}
+					onOpenChange={handleCloseActionDialog}
+				>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>{actionDialogCategory.name}</DialogTitle>
+							<DialogDescription>
+								Wybierz akcję dla tej kategorii
+							</DialogDescription>
+						</DialogHeader>
+
+						<View className="gap-2">
+							{actionDialogCategory.type === "local" &&
+								!actionDialogCategory.hasInDictionary && (
+									<Button onPress={handleAddToDictionary}>
+										<Text>Dodaj kategorię do słownika</Text>
+									</Button>
+								)}
+							{actionDialogCategory.type === "local" && (
+								<Button variant="destructive" onPress={handleDeleteLocal}>
+									<Text>Usuń kategorię lokalną</Text>
+								</Button>
+							)}
+						</View>
+
+						<DialogFooter>
+							<Button variant="outline" onPress={handleCloseActionDialog}>
+								<Text>Anuluj</Text>
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+			)}
 		</Dialog>
 	);
 }

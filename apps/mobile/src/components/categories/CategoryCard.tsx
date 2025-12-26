@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Alert, Pressable, View } from "react-native";
 import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
-import { getCategoryIconWithFallback } from "@/lib/icons";
+import { getCategoryIcon } from "@/lib/icons";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
 import { EditCategoryDialog } from "./EditCategoryDialog";
 
@@ -15,7 +15,7 @@ interface CategoryCardProps {
 
 export function CategoryCard(props: CategoryCardProps) {
 	const { category, width } = props;
-	const IconComponent = getCategoryIconWithFallback(category.icon);
+	const IconComponent = getCategoryIcon(category.icon);
 
 	const [isEditOpen, setIsEditOpen] = useState(false);
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);

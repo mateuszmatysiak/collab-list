@@ -1,6 +1,6 @@
 import { Pressable, View } from "react-native";
 import { Icon } from "@/components/ui/Icon";
-import { getCategoryIconWithFallback } from "@/lib/icons";
+import { getCategoryIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export const POPULAR_ICONS = [
@@ -41,7 +41,7 @@ export function IconPicker(props: IconPickerProps) {
 	return (
 		<View className="flex-row flex-wrap gap-2">
 			{POPULAR_ICONS.map((iconName) => {
-				const IconComponent = getCategoryIconWithFallback(iconName);
+				const IconComponent = getCategoryIcon(iconName);
 				const isSelected = selectedIcon === iconName;
 
 				return (
