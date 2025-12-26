@@ -110,7 +110,7 @@ export async function getUserLists(userId: string) {
 		.where(eq(listShares.userId, userId));
 
 	const allLists = [
-		...ownedLists.map((list) => ({ list, role: "owner" as const })),
+		...ownedLists.map((list) => ({ list, role: "owner" })),
 		...sharedListsData.map(({ list, share }) => ({ list, role: share.role })),
 	];
 

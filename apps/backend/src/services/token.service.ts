@@ -21,7 +21,7 @@ export async function createRefreshToken(userId: string): Promise<string> {
 	return token;
 }
 
-export async function verifyRefreshToken(token: string): Promise<string> {
+async function verifyRefreshToken(token: string): Promise<string> {
 	const [refreshToken] = await db
 		.select()
 		.from(refreshTokens)
@@ -62,10 +62,4 @@ export async function refreshAccessToken(
 
 export async function revokeRefreshToken(token: string): Promise<void> {
 	await db.delete(refreshTokens).where(eq(refreshTokens.token, token));
-}
-
-export async function revokeAllUserRefreshTokens(
-	userId: string,
-): Promise<void> {
-	await db.delete(refreshTokens).where(eq(refreshTokens.userId, userId));
 }

@@ -1,3 +1,4 @@
+import type { CategoryType } from "@collab-list/shared/types";
 import { and, eq, inArray, max } from "drizzle-orm";
 import { db } from "../db/index";
 import { listItems, userCategories } from "../db/schema";
@@ -56,7 +57,7 @@ export async function createItem(
 	title: string,
 	description?: string,
 	categoryId?: string | null,
-	categoryType?: "user" | "local" | null,
+	categoryType?: CategoryType | null,
 ) {
 	const access = await checkListAccess(listId, userId);
 
@@ -152,7 +153,7 @@ export async function updateItem(
 		description?: string;
 		is_completed?: boolean;
 		categoryId?: string | null;
-		categoryType?: "user" | "local" | null;
+		categoryType?: CategoryType | null;
 	},
 ) {
 	const access = await checkListAccess(listId, userId);
@@ -200,7 +201,7 @@ export async function updateItem(
 		description?: string;
 		isCompleted?: boolean;
 		categoryId?: string | null;
-		categoryType?: "user" | "local" | null;
+		categoryType?: CategoryType | null;
 	} = {};
 
 	if (data.title !== undefined) {

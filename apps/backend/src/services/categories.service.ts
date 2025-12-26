@@ -1,7 +1,8 @@
+import type { CategoryType } from "@collab-list/shared/types";
 import { and, eq, isNull, or } from "drizzle-orm";
 import { db } from "../db/index";
-import { lists, userCategories } from "../db/schema";
-import { ConflictError, NotFoundError } from "../utils/errors";
+import { lists, userCategories, users } from "../db/schema";
+import { ConflictError, ForbiddenError, NotFoundError } from "../utils/errors";
 import { checkListAccess } from "./lists.service";
 
 export async function getUserCategories(userId: string) {
@@ -45,8 +46,10 @@ export async function getCategoriesForList(listId: string, userId: string) {
 			icon: userCategories.icon,
 			listId: userCategories.listId,
 			createdAt: userCategories.createdAt,
+			authorName: users.name,
 		})
 		.from(userCategories)
+		.leftJoin(users, eq(userCategories.userId, users.id))
 		.where(
 			or(
 				and(
@@ -58,13 +61,28 @@ export async function getCategoriesForList(listId: string, userId: string) {
 		)
 		.orderBy(userCategories.name);
 
-	return categories.map((cat) => ({
-		id: cat.id,
-		name: cat.name,
-		icon: cat.icon,
-		type: cat.listId ? ("local" as const) : ("user" as const),
-		isOwner: cat.userId === userId,
-	}));
+	const userCategoryNames = await db
+		.select({ name: userCategories.name })
+		.from(userCategories)
+		.where(
+			and(eq(userCategories.userId, userId), isNull(userCategories.listId)),
+		);
+
+	const userCategoryNameSet = new Set(
+		userCategoryNames.map((cat) => cat.name.trim().toLowerCase()),
+	);
+
+	return categories.map((cat) => {
+		const normalizedName = cat.name.trim().toLowerCase();
+		return {
+			id: cat.id,
+			name: cat.name,
+			type: cat.listId ? "local" : "user",
+			isOwner: cat.userId === userId,
+			hasInDictionary: userCategoryNameSet.has(normalizedName),
+			authorName: cat.listId ? cat.authorName : undefined,
+		};
+	});
 }
 
 export async function createUserCategory(
@@ -158,8 +176,7 @@ export async function createLocalCategory(
 		return {
 			id: category.id,
 			name: category.name,
-			icon: category.icon,
-			type: "user" as const,
+			type: "user",
 			isOwner: true,
 		};
 	}
@@ -196,7 +213,7 @@ export async function createLocalCategory(
 		id: category.id,
 		name: category.name,
 		icon: category.icon,
-		type: "local" as const,
+		type: "local",
 		isOwner: false,
 	};
 }
@@ -272,9 +289,110 @@ export async function deleteUserCategory(categoryId: string, userId: string) {
 	await db.delete(userCategories).where(eq(userCategories.id, categoryId));
 }
 
+export async function deleteLocalCategory(
+	categoryId: string,
+	listId: string,
+	userId: string,
+) {
+	const access = await checkListAccess(listId, userId);
+	if (!access) {
+		throw new NotFoundError("Nie znaleziono listy");
+	}
+
+	const [category] = await db
+		.select()
+		.from(userCategories)
+		.where(
+			and(eq(userCategories.id, categoryId), eq(userCategories.listId, listId)),
+		)
+		.limit(1);
+
+	if (!category) {
+		throw new NotFoundError("Nie znaleziono kategorii lokalnej");
+	}
+
+	if (!category.listId) {
+		throw new ForbiddenError(
+			"Nie można usunąć kategorii globalnej z poziomu listy",
+		);
+	}
+
+	const [list] = await db
+		.select()
+		.from(lists)
+		.where(eq(lists.id, listId))
+		.limit(1);
+
+	if (!list) {
+		throw new NotFoundError("Nie znaleziono listy");
+	}
+
+	if (category.userId !== userId && list.authorId !== userId) {
+		throw new ForbiddenError("Nie masz uprawnień do usunięcia tej kategorii");
+	}
+
+	await db.delete(userCategories).where(eq(userCategories.id, categoryId));
+}
+
+export async function saveLocalToUser(
+	localCategoryId: string,
+	listId: string,
+	userId: string,
+) {
+	const access = await checkListAccess(listId, userId);
+	if (!access) {
+		throw new NotFoundError("Nie znaleziono listy");
+	}
+
+	const [localCategory] = await db
+		.select()
+		.from(userCategories)
+		.where(
+			and(
+				eq(userCategories.id, localCategoryId),
+				eq(userCategories.listId, listId),
+			),
+		)
+		.limit(1);
+
+	if (!localCategory) {
+		throw new NotFoundError("Nie znaleziono kategorii lokalnej");
+	}
+
+	const [existing] = await db
+		.select()
+		.from(userCategories)
+		.where(
+			and(
+				eq(userCategories.userId, userId),
+				eq(userCategories.name, localCategory.name),
+				isNull(userCategories.listId),
+			),
+		)
+		.limit(1);
+
+	if (existing) {
+		throw new ConflictError(
+			`Masz już globalną kategorię o nazwie: ${localCategory.name}`,
+		);
+	}
+
+	const [newCategory] = await db
+		.insert(userCategories)
+		.values({
+			userId,
+			name: localCategory.name,
+			icon: localCategory.icon,
+			listId: null,
+		})
+		.returning();
+
+	return newCategory;
+}
+
 export async function validateCategoryForList(
 	categoryId: string,
-	categoryType: "user" | "local",
+	categoryType: CategoryType,
 	listId: string,
 ): Promise<boolean> {
 	const [list] = await db
@@ -317,4 +435,68 @@ export async function validateCategoryForList(
 	}
 
 	return false;
+}
+
+export async function importLocalToOwner(
+	localCategoryId: string,
+	listId: string,
+	userId: string,
+) {
+	const [list] = await db
+		.select()
+		.from(lists)
+		.where(eq(lists.id, listId))
+		.limit(1);
+
+	if (!list) {
+		throw new NotFoundError("Nie znaleziono listy");
+	}
+
+	if (list.authorId !== userId) {
+		throw new ForbiddenError("Tylko autor listy może importować kategorie");
+	}
+
+	const [localCategory] = await db
+		.select()
+		.from(userCategories)
+		.where(
+			and(
+				eq(userCategories.id, localCategoryId),
+				eq(userCategories.listId, listId),
+			),
+		)
+		.limit(1);
+
+	if (!localCategory) {
+		throw new NotFoundError("Nie znaleziono kategorii lokalnej");
+	}
+
+	const [existing] = await db
+		.select()
+		.from(userCategories)
+		.where(
+			and(
+				eq(userCategories.userId, userId),
+				eq(userCategories.name, localCategory.name),
+				isNull(userCategories.listId),
+			),
+		)
+		.limit(1);
+
+	if (existing) {
+		throw new ConflictError(
+			`Masz już globalną kategorię o nazwie: ${localCategory.name}`,
+		);
+	}
+
+	const [updatedCategory] = await db
+		.update(userCategories)
+		.set({
+			userId,
+			listId: null,
+		})
+		.where(eq(userCategories.id, localCategoryId))
+		.returning();
+
+	return updatedCategory;
 }
