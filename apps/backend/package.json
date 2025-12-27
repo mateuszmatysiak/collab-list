@@ -9,7 +9,7 @@
 	},
 	"scripts": {
 		"dev": "tsx watch --env-file=.env src/index.ts",
-		"build": "tsc",
+		"build": "tsup",
 		"start": "node --env-file=.env dist/index.js",
 		"typecheck": "tsc --noEmit",
 		"db:generate": "drizzle-kit generate",
@@ -18,9 +18,9 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
+		"@collab-list/shared": "workspace:*",
 		"@hono/node-server": "1.19.6",
 		"@hono/zod-validator": "0.7.5",
-		"@collab-list/shared": "workspace:*",
 		"bcrypt": "6.0.0",
 		"drizzle-orm": "0.44.7",
 		"hono": "4.10.7",
@@ -33,6 +33,7 @@
 		"@types/jsonwebtoken": "9.0.10",
 		"dotenv": "17.2.3",
 		"drizzle-kit": "0.31.7",
+		"tsup": "8.5.1",
 		"tsx": "4.21.0"
 	}
 }
