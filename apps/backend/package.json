@@ -21,6 +21,7 @@
 		"@collab-list/shared": "workspace:*",
 		"@hono/node-server": "1.19.6",
 		"@hono/zod-validator": "0.7.5",
+		"@neondatabase/serverless": "1.0.2",
 		"bcrypt": "6.0.0",
 		"drizzle-orm": "0.44.7",
 		"hono": "4.10.7",
