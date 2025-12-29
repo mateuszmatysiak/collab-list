@@ -77,6 +77,7 @@ export async function getCategoriesForList(listId: string, userId: string) {
 		return {
 			id: cat.id,
 			name: cat.name,
+			icon: cat.icon,
 			type: cat.listId ? "local" : "user",
 			isOwner: cat.userId === userId,
 			hasInDictionary: userCategoryNameSet.has(normalizedName),
@@ -176,6 +177,7 @@ export async function createLocalCategory(
 		return {
 			id: category.id,
 			name: category.name,
+			icon: category.icon,
 			type: "user",
 			isOwner: true,
 		};
