@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getEnv } from "@/config/env";
+import { API_TIMEOUT_MS } from "@/lib/constants";
 import {
 	clearTokens,
 	getAccessToken,
@@ -7,14 +8,24 @@ import {
 	setTokens,
 } from "@/lib/storage";
 
+// Lazy initialization - baseURL will be set in the interceptor
+// EnvGuard checks the env during rendering, so if the env is invalid,
+// ErrorBoundary will catch the error before apiClient is used
 export const apiClient = axios.create({
-	baseURL: getEnv().EXPO_PUBLIC_API_URL,
-	timeout: 10000,
+	baseURL: "", // Will be set in the interceptor
+	timeout: API_TIMEOUT_MS,
 	headers: { "Content-Type": "application/json" },
 });
 
 apiClient.interceptors.request.use(
 	async (config) => {
+		// Lazy initialization baseURL - getEnv() is called here
+		// but EnvGuard checks the env during rendering, so if the env is invalid,
+		// ErrorBoundary will catch the error before this interceptor is called
+		if (!config.baseURL) {
+			config.baseURL = getEnv().EXPO_PUBLIC_API_URL;
+		}
+
 		const accessToken = await getAccessToken();
 		if (accessToken) {
 			config.headers.Authorization = `Bearer ${accessToken}`;
@@ -40,10 +51,10 @@ apiClient.interceptors.response.use(
 					return Promise.reject(error);
 				}
 
-				const response = await axios.post(
-					`${apiClient.defaults.baseURL}/api/auth/refresh`,
-					{ refreshToken },
-				);
+				const baseURL = getEnv().EXPO_PUBLIC_API_URL;
+				const response = await axios.post(`${baseURL}/api/auth/refresh`, {
+					refreshToken,
+				});
 
 				const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
 					response.data;
