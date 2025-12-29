@@ -103,7 +103,7 @@ export default function RegisterScreen() {
 								name="login"
 								render={({ field: { onChange, onBlur, value } }) => (
 									<Input
-										placeholder="x"
+										placeholder="jankowalski"
 										value={value}
 										onChangeText={onChange}
 										onBlur={onBlur}
@@ -129,14 +129,14 @@ export default function RegisterScreen() {
 								name="password"
 								render={({ field: { onChange, onBlur, value } }) => (
 									<PasswordInput
-										placeholder="Hasło (min. 6 znaków)"
+										placeholder="Wprowadź swoje hasło"
 										value={value}
 										onChangeText={onChange}
 										onBlur={onBlur}
 										autoCapitalize="none"
 										autoComplete="password"
 										accessibilityLabel="Hasło"
-										accessibilityHint="Wprowadź hasło (minimum 6 znaków)"
+										accessibilityHint="Wprowadź swoje hasło"
 										error={!!errors.password}
 									/>
 								)}
