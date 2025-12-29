@@ -14,4 +14,3 @@ export function EnvGuard(props: EnvGuardProps) {
 
 	return <>{children}</>;
 }
-
