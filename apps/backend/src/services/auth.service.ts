@@ -4,6 +4,7 @@ import { systemCategories, userCategories, users } from "../db/schema";
 import {
 	AppError,
 	ConflictError,
+	ForbiddenError,
 	NotFoundError,
 	UnauthorizedError,
 } from "../utils/errors";
@@ -31,6 +32,12 @@ export async function createUser(
 	login: string,
 	password: string,
 ) {
+	const userCount = await db.select().from(users);
+
+	if (userCount.length >= 2) {
+		throw new ForbiddenError("Nie można utworzyć konta");
+	}
+
 	const existingUser = await db
 		.select()
 		.from(users)
