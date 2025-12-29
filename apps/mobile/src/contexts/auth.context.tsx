@@ -18,8 +18,8 @@ interface AuthContextType {
 	user: User | null;
 	isLoading: boolean;
 	isAuthenticated: boolean;
-	login: (email: string, password: string) => Promise<void>;
-	register: (name: string, email: string, password: string) => Promise<void>;
+	login: (login: string, password: string) => Promise<void>;
+	register: (name: string, login: string, password: string) => Promise<void>;
 	logout: () => Promise<void>;
 	refetchUser: () => Promise<void>;
 }
@@ -37,8 +37,8 @@ export function AuthProvider(props: PropsWithChildren) {
 	const { data: meData, isLoading: isMeLoading, refetch } = useMe();
 
 	const login = useCallback(
-		async (email: string, password: string) => {
-			const data: LoginRequest = { email, password };
+		async (login: string, password: string) => {
+			const data: LoginRequest = { login, password };
 			const response = await loginMutation.mutateAsync(data);
 
 			await setTokens(response.accessToken, response.refreshToken);
@@ -48,8 +48,8 @@ export function AuthProvider(props: PropsWithChildren) {
 	);
 
 	const register = useCallback(
-		async (name: string, email: string, password: string) => {
-			const data: RegisterRequest = { name, email, password };
+		async (name: string, login: string, password: string) => {
+			const data: RegisterRequest = { name, login, password };
 			const response = await registerMutation.mutateAsync(data);
 
 			await setTokens(response.accessToken, response.refreshToken);

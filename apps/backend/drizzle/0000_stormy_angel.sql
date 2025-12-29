@@ -56,10 +56,10 @@ CREATE TABLE "user_categories" (
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
-	"email" varchar(255) NOT NULL,
+	"login" varchar(255) NOT NULL,
 	"password_hash" varchar(255) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "users_email_unique" UNIQUE("email")
+	CONSTRAINT "users_login_unique" UNIQUE("login")
 );
 --> statement-breakpoint
 ALTER TABLE "list_items" ADD CONSTRAINT "list_items_list_id_lists_id_fk" FOREIGN KEY ("list_id") REFERENCES "public"."lists"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -80,4 +80,4 @@ CREATE INDEX "refresh_tokens_token_idx" ON "refresh_tokens" USING btree ("token"
 CREATE INDEX "user_categories_user_id_idx" ON "user_categories" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "user_categories_list_id_idx" ON "user_categories" USING btree ("list_id");--> statement-breakpoint
 CREATE INDEX "user_categories_user_list_idx" ON "user_categories" USING btree ("user_id","list_id");--> statement-breakpoint
-CREATE INDEX "users_email_idx" ON "users" USING btree ("email");
+CREATE INDEX "users_login_idx" ON "users" USING btree ("login");

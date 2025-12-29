@@ -25,7 +25,7 @@ async function checkListOwnership(
 export async function shareList(
 	listId: string,
 	ownerId: string,
-	email: string,
+	login: string,
 ) {
 	const isOwner = await checkListOwnership(listId, ownerId);
 
@@ -36,11 +36,11 @@ export async function shareList(
 	const [targetUser] = await db
 		.select()
 		.from(users)
-		.where(eq(users.email, email))
+		.where(eq(users.login, login))
 		.limit(1);
 
 	if (!targetUser) {
-		throw new NotFoundError("Nie znaleziono użytkownika z tym emailem");
+		throw new NotFoundError("Nie znaleziono użytkownika z tym loginem");
 	}
 
 	if (targetUser.id === ownerId) {
@@ -148,7 +148,7 @@ export async function getListShares(listId: string, userId: string) {
 		.select({
 			id: users.id,
 			name: users.name,
-			email: users.email,
+			login: users.login,
 		})
 		.from(users)
 		.where(eq(users.id, list.authorId))
@@ -168,7 +168,7 @@ export async function getListShares(listId: string, userId: string) {
 			id: share.id,
 			userId: user.id,
 			userName: user.name,
-			userEmail: user.email,
+			userLogin: user.login,
 			role: share.role,
 			createdAt: share.createdAt,
 		})),

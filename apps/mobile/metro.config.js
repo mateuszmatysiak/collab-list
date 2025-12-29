@@ -2,14 +2,19 @@ const { getDefaultConfig } = require("expo/metro-config");
 const path = require("node:path");
 const { withNativeWind } = require("nativewind/metro");
 
-const config = getDefaultConfig(__dirname);
+const projectRoot = __dirname;
+const workspaceRoot = path.resolve(projectRoot, "../..");
 
-config.resolver = {
-	...config.resolver,
-	alias: {
-		"@": path.resolve(__dirname, "src"),
-		"@collab-list/shared": path.resolve(__dirname, "../../packages/shared/src"),
-	},
+const config = getDefaultConfig(projectRoot);
+
+config.watchFolders = [...(config.watchFolders || []), workspaceRoot];
+config.resolver.nodeModulesPaths = [
+	path.resolve(projectRoot, "node_modules"),
+	path.resolve(workspaceRoot, "node_modules"),
+];
+config.resolver.alias = {
+	"@": path.resolve(projectRoot, "src"),
+	"@collab-list/shared": path.resolve(workspaceRoot, "packages/shared/src"),
 };
 
 module.exports = withNativeWind(config, { input: "./global.css" });

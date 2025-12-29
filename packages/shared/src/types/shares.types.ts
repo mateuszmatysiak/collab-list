@@ -12,7 +12,7 @@ export interface ShareWithUser {
 	id: string;
 	userId: string;
 	userName: string;
-	userEmail: string;
+	userLogin: string;
 	role: ListRole;
 	createdAt: Date;
 }
@@ -20,7 +20,7 @@ export interface ShareWithUser {
 export interface SharesAuthor {
 	id: string;
 	name: string;
-	email: string;
+	login: string;
 }
 
 export interface SharesResponse {

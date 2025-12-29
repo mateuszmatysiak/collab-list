@@ -18,11 +18,11 @@ export const users = pgTable(
 	{
 		id: uuid("id").defaultRandom().primaryKey(),
 		name: varchar("name", { length: 255 }).notNull(),
-		email: varchar("email", { length: 255 }).notNull().unique(),
+		login: varchar("login", { length: 255 }).notNull().unique(),
 		passwordHash: varchar("password_hash", { length: 255 }).notNull(),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 	},
-	(table) => [index("users_email_idx").on(table.email)],
+	(table) => [index("users_login_idx").on(table.login)],
 );
 
 export const lists = pgTable(

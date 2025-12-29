@@ -1,8 +1,9 @@
 import { Redirect } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
+import { ServerHealthGuard } from "@/components/guards/ServerHealthGuard";
 import { useAuth } from "@/contexts/auth.context";
 
-export default function Index() {
+function IndexContent() {
 	const { isAuthenticated, isLoading } = useAuth();
 
 	if (isLoading) {
@@ -18,4 +19,12 @@ export default function Index() {
 	}
 
 	return <Redirect href="/(auth)/login" />;
+}
+
+export default function Index() {
+	return (
+		<ServerHealthGuard>
+			<IndexContent />
+		</ServerHealthGuard>
+	);
 }

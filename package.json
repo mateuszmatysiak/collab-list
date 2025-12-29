@@ -5,7 +5,8 @@
 	"type": "module",
 	"author": "Mateusz Matysiak",
 	"engines": {
-		"node": "22.16.0"
+		"node": "22.16.0",
+		"pnpm": "9.15.0"
 	},
 	"packageManager": "pnpm@9.15.0",
 	"scripts": {
@@ -23,6 +24,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.3.8",
 		"@types/node": "22.16.0",
+		"dotenv": "17.2.3",
 		"typescript": "5.9.3"
 	}
 }
