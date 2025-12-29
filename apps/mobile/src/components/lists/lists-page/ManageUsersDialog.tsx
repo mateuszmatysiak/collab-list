@@ -28,17 +28,15 @@ interface ManageUsersDialogProps {
 	onOpenChange: (open: boolean) => void;
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function isValidEmail(email: string): boolean {
-	return EMAIL_REGEX.test(email);
+function isValidLogin(login: string): boolean {
+	return login.trim().length > 0 && login.trim().length <= 255;
 }
 
 export function ManageUsersDialog(props: ManageUsersDialogProps) {
 	const { list, open, onOpenChange } = props;
 
-	const [email, setEmail] = useState("");
-	const [emailError, setEmailError] = useState("");
+	const [login, setLogin] = useState("");
+	const [loginError, setLoginError] = useState("");
 
 	const { data: sharesData } = useShares(list.id);
 	const shares = sharesData?.shares ?? [];
@@ -49,25 +47,25 @@ export function ManageUsersDialog(props: ManageUsersDialogProps) {
 	const isOwner = useIsListOwner(list);
 
 	function handleShare() {
-		const trimmedEmail = email.trim();
+		const trimmedLogin = login.trim();
 
-		if (!trimmedEmail) {
-			setEmailError("Email jest wymagany");
+		if (!trimmedLogin) {
+			setLoginError("Login jest wymagany");
 			return;
 		}
 
-		if (!isValidEmail(trimmedEmail)) {
-			setEmailError("Nieprawidłowy format email");
+		if (!isValidLogin(trimmedLogin)) {
+			setLoginError("Login musi mieć od 1 do 255 znaków");
 			return;
 		}
 
-		setEmailError("");
+		setLoginError("");
 
 		shareList(
-			{ email: trimmedEmail },
+			{ login: trimmedLogin },
 			{
 				onSuccess: () => {
-					setEmail("");
+					setLogin("");
 				},
 				onError: () => {
 					Alert.alert(
@@ -80,14 +78,14 @@ export function ManageUsersDialog(props: ManageUsersDialogProps) {
 	}
 
 	function handleClose() {
-		setEmail("");
-		setEmailError("");
+		setLogin("");
+		setLoginError("");
 		onOpenChange(false);
 	}
 
-	function handleChangeEmail(text: string) {
-		setEmail(text);
-		if (emailError) setEmailError("");
+	function handleChangeLogin(text: string) {
+		setLogin(text);
+		if (loginError) setLoginError("");
 	}
 
 	return (
@@ -120,17 +118,16 @@ export function ManageUsersDialog(props: ManageUsersDialogProps) {
 						<View className="flex-row gap-2">
 							<Input
 								className="flex-1"
-								placeholder="Email użytkownika"
-								value={email}
-								onChangeText={handleChangeEmail}
+								placeholder="Login użytkownika"
+								value={login}
+								onChangeText={handleChangeLogin}
 								editable={!isSharing}
-								keyboardType="email-address"
 								autoCapitalize="none"
 							/>
 							<Button
 								size="icon"
 								onPress={handleShare}
-								disabled={!email.trim() || isSharing}
+								disabled={!login.trim() || isSharing}
 							>
 								<Icon
 									as={UserPlus}
@@ -139,8 +136,8 @@ export function ManageUsersDialog(props: ManageUsersDialogProps) {
 								/>
 							</Button>
 						</View>
-						{emailError ? (
-							<Text className="text-sm text-destructive">{emailError}</Text>
+						{loginError ? (
+							<Text className="text-sm text-destructive">{loginError}</Text>
 						) : null}
 					</View>
 				)}
@@ -172,7 +169,7 @@ function AuthorItem(props: AuthorItemProps) {
 						<Text className="text-xs text-primary font-medium">Autor</Text>
 					</View>
 				</View>
-				<Text className="text-xs text-muted-foreground">{author.email}</Text>
+				<Text className="text-xs text-muted-foreground">{author.login}</Text>
 			</View>
 		</View>
 	);
@@ -212,7 +209,7 @@ function ShareItem(props: ShareItemProps) {
 				<View className="flex-1">
 					<Text className="text-sm font-medium">{share.userName}</Text>
 					<Text className="text-xs text-muted-foreground">
-						{share.userEmail}
+						{share.userLogin}
 					</Text>
 				</View>
 				{canRemove && (

@@ -28,17 +28,17 @@ async function copySystemCategoriesToUser(userId: string) {
 
 export async function createUser(
 	name: string,
-	email: string,
+	login: string,
 	password: string,
 ) {
 	const existingUser = await db
 		.select()
 		.from(users)
-		.where(eq(users.email, email))
+		.where(eq(users.login, login))
 		.limit(1);
 
 	if (existingUser.length > 0) {
-		throw new ConflictError("Użytkownik o takim emailu już istnieje");
+		throw new ConflictError("Użytkownik o takim loginie już istnieje");
 	}
 
 	const passwordHash = await hashPassword(password);
@@ -47,7 +47,7 @@ export async function createUser(
 		.insert(users)
 		.values({
 			name,
-			email,
+			login,
 			passwordHash,
 		})
 		.returning();
@@ -65,21 +65,21 @@ export async function createUser(
 	return user;
 }
 
-export async function authenticateUser(email: string, password: string) {
+export async function authenticateUser(login: string, password: string) {
 	const [user] = await db
 		.select()
 		.from(users)
-		.where(eq(users.email, email))
+		.where(eq(users.login, login))
 		.limit(1);
 
 	if (!user) {
-		throw new UnauthorizedError("Nieprawidłowy email lub hasło");
+		throw new UnauthorizedError("Nieprawidłowy login lub hasło");
 	}
 
 	const isValid = await verifyPassword(password, user.passwordHash);
 
 	if (!isValid) {
-		throw new UnauthorizedError("Nieprawidłowy email lub hasło");
+		throw new UnauthorizedError("Nieprawidłowy login lub hasło");
 	}
 
 	return user;

@@ -28,7 +28,7 @@ export default function LoginScreen() {
 	} = useForm<LoginRequest>({
 		resolver: zodResolver(loginSchema),
 		defaultValues: {
-			email: "",
+			login: "",
 			password: "",
 		},
 	});
@@ -38,7 +38,7 @@ export default function LoginScreen() {
 		setIsLoading(true);
 
 		try {
-			await login(data.email, data.password);
+			await login(data.login, data.password);
 			router.replace("/(tabs)/lists");
 		} catch (err) {
 			const axiosError = err as AxiosError<ApiErrorResponse>;
@@ -77,28 +77,27 @@ export default function LoginScreen() {
 
 					<View className="gap-4">
 						<View className="gap-2">
-							<Label nativeID="email">Email</Label>
+							<Label nativeID="login">Login</Label>
 							<Controller
 								control={control}
-								name="email"
+								name="login"
 								render={({ field: { onChange, onBlur, value } }) => (
 									<Input
-										placeholder="x@example.com"
+										placeholder="jankowalski"
 										value={value}
 										onChangeText={onChange}
 										onBlur={onBlur}
-										keyboardType="email-address"
 										autoCapitalize="none"
-										autoComplete="email"
-										accessibilityLabel="Email"
-										accessibilityHint="Wprowadź swój adres email"
-										error={!!errors.email}
+										autoComplete="username"
+										accessibilityLabel="Login"
+										accessibilityHint="Wprowadź swój login"
+										error={!!errors.login}
 									/>
 								)}
 							/>
-							{errors.email && (
+							{errors.login && (
 								<Text className="text-sm text-destructive">
-									{errors.email.message}
+									{errors.login.message}
 								</Text>
 							)}
 						</View>
@@ -110,7 +109,7 @@ export default function LoginScreen() {
 								name="password"
 								render={({ field: { onChange, onBlur, value } }) => (
 									<PasswordInput
-										placeholder="Hasło"
+										placeholder="Wprowadź swoje hasło"
 										value={value}
 										onChangeText={onChange}
 										onBlur={onBlur}

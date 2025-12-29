@@ -14,9 +14,9 @@ export const shareListController = [
 	async (c: Context) => {
 		const userId = c.get("userId");
 		const listId = c.req.param("id");
-		const { email } = getValidatedJson(c, shareListSchema);
+		const { login } = getValidatedJson(c, shareListSchema);
 
-		const share = await shareList(listId, userId, email);
+		const share = await shareList(listId, userId, login);
 
 		return c.json({ share }, 201);
 	},

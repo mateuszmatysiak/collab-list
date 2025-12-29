@@ -91,7 +91,7 @@ async function seed() {
 			.insert(users)
 			.values({
 				name: "X",
-				email: "x@example.com",
+				login: "x",
 				passwordHash,
 			})
 			.returning();
@@ -100,7 +100,7 @@ async function seed() {
 			.insert(users)
 			.values({
 				name: "Y",
-				email: "y@example.com",
+				login: "y",
 				passwordHash,
 			})
 			.returning();
@@ -124,8 +124,8 @@ async function seed() {
 		console.log("   - 9 kategorii systemowych");
 		console.log("   - 18 kategorii użytkowników (9 x 2 użytkowników)\n");
 		console.log("📝 Konta użytkowników (hasło: haslo123):");
-		console.log("   - x@example.com (pusta baza danych)");
-		console.log("   - y@example.com (pusta baza danych)\n");
+		console.log("   - x (pusta baza danych)");
+		console.log("   - y (pusta baza danych)\n");
 		process.exit(0);
 	} catch (error) {
 		console.error("❌ Błąd podczas wypełniania bazy danych:", error);

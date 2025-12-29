@@ -54,7 +54,7 @@ export default function ProfileScreen() {
 						<Text className="text-2xl font-bold">{user.name}</Text>
 						<View className="flex-row items-center gap-2">
 							<Icon as={Mail} className="text-muted-foreground" size={16} />
-							<Text className="text-muted-foreground">{user.email}</Text>
+							<Text className="text-muted-foreground">{user.login}</Text>
 						</View>
 
 						<View className="flex-row items-center gap-2">

@@ -21,9 +21,9 @@ import { createJsonValidator, getValidatedJson } from "../utils/validator";
 export const register = [
 	createJsonValidator(registerSchema),
 	async (c: Context) => {
-		const { name, email, password } = getValidatedJson(c, registerSchema);
+		const { name, login, password } = getValidatedJson(c, registerSchema);
 
-		const user = await createUser(name, email, password);
+		const user = await createUser(name, login, password);
 
 		const accessToken = generateAccessToken(user.id);
 		const refreshToken = await createRefreshToken(user.id);
@@ -32,7 +32,7 @@ export const register = [
 			user: {
 				id: user.id,
 				name: user.name,
-				email: user.email,
+				login: user.login,
 				createdAt: user.createdAt,
 			},
 			accessToken,
@@ -44,9 +44,9 @@ export const register = [
 export const login = [
 	createJsonValidator(loginSchema),
 	async (c: Context) => {
-		const { email, password } = getValidatedJson(c, loginSchema);
+		const { login, password } = getValidatedJson(c, loginSchema);
 
-		const user = await authenticateUser(email, password);
+		const user = await authenticateUser(login, password);
 
 		const accessToken = generateAccessToken(user.id);
 		const refreshToken = await createRefreshToken(user.id);
@@ -55,7 +55,7 @@ export const login = [
 			user: {
 				id: user.id,
 				name: user.name,
-				email: user.email,
+				login: user.login,
 				createdAt: user.createdAt,
 			},
 			accessToken,
@@ -88,7 +88,7 @@ export const logout = [
 
 		return c.json({
 			message: "Wylogowano pomyślnie",
-			email: user.email,
+			login: user.login,
 		});
 	},
 ];
@@ -108,7 +108,7 @@ export const me = [
 			user: {
 				id: user.id,
 				name: user.name,
-				email: user.email,
+				login: user.login,
 				createdAt: user.createdAt,
 			},
 		});
