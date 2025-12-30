@@ -86,7 +86,7 @@ const port = getEnv().PORT;
 console.log(`Server starting on port ${port}...`);
 console.log(`Environment: ${getEnv().NODE_ENV}`);
 
-serve(
+const server = serve(
 	{
 		fetch: app.fetch,
 		port: Number(port),
@@ -97,3 +97,14 @@ serve(
 		console.log(`Local: http://localhost:${Number(port)}`);
 	},
 );
+
+const shutdown = () => {
+	console.log("\nShutting down server...");
+	server.close(() => {
+		console.log("Server closed");
+		process.exit(0);
+	});
+};
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
