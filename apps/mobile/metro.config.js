@@ -14,6 +14,7 @@ config.resolver.nodeModulesPaths = [
 ];
 config.resolver.alias = {
 	"@": path.resolve(projectRoot, "src"),
+	"@/assets": path.resolve(projectRoot, "assets"),
 	"@collab-list/shared": path.resolve(workspaceRoot, "packages/shared/src"),
 };
 

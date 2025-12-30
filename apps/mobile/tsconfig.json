@@ -3,9 +3,15 @@
 	"compilerOptions": {
 		"paths": {
 			"@/*": ["./src/*"],
+			"@/assets/*": ["./assets/*"],
 			"@collab-list/shared/*": ["../../packages/shared/src/*"]
 		}
 	},
-	"include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts"],
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		"nativewind-env.d.ts",
+		"src/types/**/*.d.ts"
+	],
 	"exclude": ["node_modules"]
 }
