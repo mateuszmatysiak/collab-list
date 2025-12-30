@@ -3,6 +3,7 @@ import { defineConfig } from "drizzle-kit";
 import { getEnv } from "./src/config/env";
 
 dotenv.config();
+dotenv.config({ path: ".env.local", override: true });
 
 export default defineConfig({
 	schema: "./src/db/schema.ts",
