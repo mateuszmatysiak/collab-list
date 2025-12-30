@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useLists } from "@/api/lists.api";
 import { Text } from "@/components/ui/Text";
-import { CreateListButton } from "./CreateListDialog";
+import { CreateListButton } from "./CreateListButton";
 import { ListCard } from "./ListCard";
 
 export type ListFilter = "all" | "mine" | "shared";

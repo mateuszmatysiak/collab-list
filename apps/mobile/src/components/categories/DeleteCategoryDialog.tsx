@@ -41,7 +41,7 @@ export function DeleteCategoryDialog(props: DeleteCategoryDialogProps) {
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>
-			<DialogContent>
+			<DialogContent centered>
 				<DialogHeader>
 					<DialogTitle>Usuń kategorię</DialogTitle>
 					<DialogDescription>

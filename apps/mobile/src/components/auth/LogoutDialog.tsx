@@ -60,7 +60,7 @@ export function LogoutDialog(props: LogoutDialogProps) {
 			)}
 
 			<Dialog open={isLogoutOpen} onOpenChange={setIsLogoutOpen}>
-				<DialogContent>
+				<DialogContent centered>
 					<DialogHeader>
 						<DialogTitle>Wylogowanie</DialogTitle>
 						<DialogDescription>
