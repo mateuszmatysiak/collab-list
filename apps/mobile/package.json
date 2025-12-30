@@ -11,6 +11,7 @@
 		"android:prod": "dotenv -e .env -- expo start --android",
 		"ios:prod": "dotenv -e .env -- expo start --ios",
 		"web:prod": "dotenv -e .env -- expo start --web",
+		"build:android:preview": "eas build --platform android --profile preview --local",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
